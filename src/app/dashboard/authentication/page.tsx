@@ -16,6 +16,7 @@ export default function AuthenticationPage() {
   const [retype, setRetype] = useState<string>("");
   const [showPwd, setShowPwd] = useState(false);
   const [showRetype, setShowRetype] = useState(false);
+  const mismatch = form.password !== retype && retype.length > 0;
 
   // Users list state
   const [users, setUsers] = useState<UserSummary[]>([]);
@@ -184,7 +185,10 @@ export default function AuthenticationPage() {
                 };
                 return (
                   <tr key={u.id}>
-                    <td className="px-4 py-3 text-sm text-gray-900">{u.username}</td>
+                    <td className="px-4 py-3">
+                      <div className="text-sm font-medium text-gray-900">{u.username}</div>
+                      <div className="font-mono text-[11px] text-gray-500">{u.id}</div>
+                    </td>
                     <td className="px-4 py-3 text-sm text-gray-700">{u.full_name || '-'}</td>
                     <td className="px-4 py-3 text-sm text-gray-700">{u.email}</td>
                     <td className="px-4 py-3 text-sm text-gray-700">{u.role || '-'}</td>
@@ -242,7 +246,8 @@ export default function AuthenticationPage() {
                 value={form.password}
                 onChange={(e) => setForm({ ...form, password: e.target.value })}
                 required
-                className="input pr-9"
+                className={`input pr-9 ${mismatch ? 'border-red-500 focus:outline-red-600' : ''}`}
+                aria-invalid={mismatch}
               />
               <button type="button" onClick={() => setShowPwd((v) => !v)} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700">
                 {showPwd ? <EyeSlashIcon className="size-4" /> : <EyeIcon className="size-4" />}
@@ -257,12 +262,16 @@ export default function AuthenticationPage() {
                 value={retype}
                 onChange={(e) => setRetype(e.target.value)}
                 required
-                className="input pr-9"
+                className={`input pr-9 ${mismatch ? 'border-red-500 focus:outline-red-600' : ''}`}
+                aria-invalid={mismatch}
               />
               <button type="button" onClick={() => setShowRetype((v) => !v)} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700">
                 {showRetype ? <EyeSlashIcon className="size-4" /> : <EyeIcon className="size-4" />}
               </button>
             </div>
+            {mismatch && (
+              <p className="mt-1 text-xs text-red-600">Password dan Retype tidak sama.</p>
+            )}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-900">Role</label>
@@ -281,7 +290,7 @@ export default function AuthenticationPage() {
             <button
               type="submit"
               className="btn-primary"
-              disabled={regLoading}
+              disabled={regLoading || mismatch}
             >
               {regLoading ? "Registering..." : "Create user"}
             </button>

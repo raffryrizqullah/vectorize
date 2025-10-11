@@ -52,6 +52,26 @@ export default function ApiKeyPage() {
     }
   }
 
+  function safeCopy(text: string) {
+    try {
+      if (typeof navigator !== "undefined" && (navigator as any).clipboard && (navigator as any).clipboard.writeText) {
+        (navigator as any).clipboard.writeText(text);
+        return;
+      }
+    } catch {}
+    try {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.left = "-9999px";
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+    } catch {}
+  }
+
   async function onRevoke(id: string) {
     const token = getToken();
     if (!token) { setError("Tidak ada token"); return; }
@@ -91,7 +111,7 @@ export default function ApiKeyPage() {
             <p className="font-medium">Copy your API key now (shown only once):</p>
             <div className="mt-2 flex items-center justify-between rounded bg-white px-3 py-2 text-gray-900">
               <span className="font-mono text-xs break-all">{createdKey}</span>
-              <button type="button" onClick={()=>navigator.clipboard.writeText(createdKey)} className="ml-3 rounded bg-primary px-2 py-1 text-xs text-white">Copy</button>
+              <button type="button" onClick={()=> createdKey && safeCopy(createdKey)} className="ml-3 rounded bg-primary px-2 py-1 text-xs text-white">Copy</button>
             </div>
           </div>
         )}
