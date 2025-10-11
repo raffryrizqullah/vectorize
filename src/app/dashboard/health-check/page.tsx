@@ -84,6 +84,17 @@ export default function HealthCheckPage() {
   const [autoRefresh, setAutoRefresh] = useState<boolean>(false);
   const [deep, setDeep] = useState<boolean>(true);
 
+  // Load cached health once on mount; avoid auto API calls
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("health_cache");
+      if (!raw) return;
+      const cached = JSON.parse(raw);
+      if (cached?.data) setResults(cached.data);
+      if (cached?.ts) setLastRefresh(cached.ts);
+    } catch {}
+  }, []);
+
   const refresh = useCallback(async () => {
     setLoading(true);
     // Prefer new summary endpoint
@@ -127,6 +138,11 @@ export default function HealthCheckPage() {
     }
     setLatency(newLatency);
 
+    // Cache combined result and timestamp
+    const ts = new Date().toISOString();
+    try { localStorage.setItem("health_cache", JSON.stringify({ data: combined, ts })); } catch {}
+    setLastRefresh(ts);
+
     // Update 24h distribution sample in localStorage
     try {
       const now = Date.now();
@@ -150,7 +166,6 @@ export default function HealthCheckPage() {
       localStorage.setItem(storeKey, JSON.stringify(raw));
     } catch {}
 
-    setLastRefresh(new Date().toISOString());
     setLoading(false);
   }, []);
 

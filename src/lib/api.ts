@@ -76,3 +76,150 @@ export async function meRequest(token: string) {
   }
   return res.json();
 }
+
+export type RegisterBody = {
+  username: string;
+  email: string;
+  password: string;
+  full_name: string;
+  role?: string; // admin | lecturer | student
+};
+
+export async function registerRequest(token: string, body: RegisterBody) {
+  const res = await fetch(`${BASE_URL}/api/v1/auth/register`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(body),
+  });
+  const ct = res.headers.get("content-type") || "";
+  const data = ct.includes("application/json") ? await res.json().catch(() => undefined) : undefined;
+  if (!res.ok) {
+    let message = "Register failed";
+    if (data) {
+      if (typeof data.detail === "string") message = data.detail;
+      else if (Array.isArray(data.detail)) message = data.detail.map((d: any) => d.msg || JSON.stringify(d)).join(", ");
+      else if (data.message) message = data.message;
+    }
+    throw new Error(message);
+  }
+  return data;
+}
+
+// Document upload
+export type UploadSingleResult = {
+  document_id: string;
+  filename: string;
+  source_link?: string;
+  custom_metadata?: Record<string, any>;
+  status: string; // queued | processing | completed | failed
+  metadata?: {
+    num_texts?: number;
+    num_tables?: number;
+    num_images?: number;
+    total_chunks?: number;
+    upload_timestamp?: string;
+    [k: string]: any;
+  };
+  message?: string;
+};
+
+export type UploadBatchResponse = {
+  total_uploaded?: number;
+  successful?: number;
+  failed?: number;
+  results?: UploadSingleResult[];
+  message?: string;
+} & UploadSingleResult; // allow server to also return single-file shape
+
+export async function uploadDocuments(
+  token: string,
+  files: File[],
+  sourceLinks: string[],
+  customMetadata?: Record<string, any>,
+): Promise<UploadBatchResponse> {
+  const form = new FormData();
+  files.forEach((f) => form.append("files", f));
+  // repeat source_links to match number of files if more than one
+  if (sourceLinks && sourceLinks.length) {
+    sourceLinks.forEach((s) => form.append("source_links", s));
+  }
+  if (customMetadata) {
+    form.append("custom_metadata", JSON.stringify(customMetadata));
+  }
+
+  const res = await fetch(`${BASE_URL}/api/v1/documents/upload`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+    body: form,
+  });
+
+  const ct = res.headers.get("content-type") || "";
+  const body = ct.includes("application/json") ? await res.json().catch(() => undefined) : undefined;
+  if (!res.ok) {
+    let message = "Upload failed";
+    if (body) {
+      if (typeof body.detail === "string") message = body.detail;
+      else if (Array.isArray(body.detail)) message = body.detail.map((d: any) => d.msg || JSON.stringify(d)).join(", ");
+      else if (body.message) message = body.message;
+    }
+    throw new Error(message);
+  }
+  return body as UploadBatchResponse;
+}
+
+// Documents list
+export type DocumentSummary = {
+  document_id: string;
+  document_name?: string | null;
+  author?: string | null;
+  client_upload_timestamp?: string | null;
+  sensitivity?: string | null;
+  total_chunks: number;
+  counts?: Record<string, number>;
+  source_links?: string[] | null;
+  metadata?: Record<string, any>;
+};
+
+export type DocumentsListResponse = {
+  total_documents: number;
+  total_vectors: number;
+  documents: DocumentSummary[];
+};
+
+export async function listDocuments(
+  token: string,
+  opts?: { filter?: string; limit?: number; namespace?: string }
+): Promise<DocumentsListResponse> {
+  const params = new URLSearchParams();
+  if (opts?.filter) params.set("filter", opts.filter);
+  if (opts?.limit) params.set("limit", String(opts.limit));
+  if (opts?.namespace) params.set("namespace", opts.namespace);
+  const url = `${BASE_URL}/api/v1/documents/list${params.toString() ? `?${params.toString()}` : ""}`;
+
+  const res = await fetch(url, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+    cache: "no-store",
+  });
+  const ct = res.headers.get("content-type") || "";
+  const body = ct.includes("application/json") ? await res.json().catch(() => undefined) : undefined;
+  if (!res.ok) {
+    let message = "Failed to fetch documents";
+    if (body) {
+      if (typeof body.detail === "string") message = body.detail;
+      else if (Array.isArray(body.detail)) message = body.detail.map((d: any) => d.msg || JSON.stringify(d)).join(", ");
+      else if (body.message) message = body.message;
+    }
+    throw new Error(message);
+  }
+  return body as DocumentsListResponse;
+}

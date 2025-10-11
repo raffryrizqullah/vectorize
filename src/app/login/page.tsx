@@ -3,13 +3,15 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { CubeTransparentIcon } from "@heroicons/react/24/outline";
+import { CubeTransparentIcon, EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import { loginRequest, TOKEN_STORAGE_KEY, getToken, meRequest } from "@/lib/api";
+import { getHealthSummary } from "@/lib/health";
 
 export default function LoginPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [showPwd, setShowPwd] = useState(false);
 
   // If already authenticated, redirect to dashboard
   useEffect(() => {
@@ -33,6 +35,12 @@ export default function LoginPage() {
         localStorage.setItem(TOKEN_STORAGE_KEY, resp.access_token);
       }
       setError(null);
+      // Prefetch health summary sekali saat login berhasil
+      try {
+        const summary = await getHealthSummary(true);
+        const payload = { data: summary, ts: new Date().toISOString() };
+        localStorage.setItem("health_cache", JSON.stringify(payload));
+      } catch {}
       router.push("/dashboard");
     } catch (err: any) {
       setError(err?.message || "Login gagal");
@@ -85,15 +93,23 @@ export default function LoginPage() {
                     <label htmlFor="password" className="block text-sm/6 font-medium text-gray-900">
                       Password
                     </label>
-                    <div className="mt-2">
+                    <div className="mt-2 relative">
                       <input
                         id="password"
                         name="password"
-                        type="password"
+                        type={showPwd ? "text" : "password"}
                         required
                         autoComplete="current-password"
-                        className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-primary sm:text-sm/6"
+                        className="block w-full rounded-md bg-white px-3 py-1.5 pr-9 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-primary sm:text-sm/6"
                       />
+                      <button
+                        type="button"
+                        onClick={() => setShowPwd((v) => !v)}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                        aria-label={showPwd ? "Hide password" : "Show password"}
+                      >
+                        {showPwd ? <EyeSlashIcon className="size-4" /> : <EyeIcon className="size-4" />}
+                      </button>
                     </div>
                   </div>
 
