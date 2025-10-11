@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Bars3Icon,
   BellIcon,
@@ -23,6 +23,7 @@ import {
   ArrowRightOnRectangleIcon,
   Cog6ToothIcon as CogSolidIcon,
 } from "@heroicons/react/20/solid";
+import { clearToken, getToken, meRequest } from "@/lib/api";
 
 type NavItem = {
   name: string;
@@ -52,8 +53,30 @@ export default function DashboardLayout({
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
+  const [userName, setUserName] = useState<string | null>(null);
 
   const isActive = (href: string) => pathname === href;
+
+  // Guard: verify token and load user
+  useEffect(() => {
+    const token = getToken();
+    if (!token) {
+      router.replace("/login");
+      return;
+    }
+    meRequest(token)
+      .then((u) => setUserName(u?.username || u?.full_name || null))
+      .catch(() => {
+        clearToken();
+        router.replace("/login");
+      })
+      .finally(() => setAuthChecked(true));
+  }, [router]);
+
+  if (!authChecked) {
+    return null; // optional: skeleton/loader can be added here
+  }
 
   return (
     <div>
@@ -240,7 +263,7 @@ export default function DashboardLayout({
                     src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=facearea&facepad=2&w=64&h=64&q=80"
                     className="size-8 rounded-full bg-gray-50"
                   />
-                  <span className="hidden lg:block text-sm/6 font-semibold text-gray-900">Tom Cook</span>
+                  <span className="hidden lg:block text-sm/6 font-semibold text-gray-900">{userName ?? "User"}</span>
                   <ChevronDownIcon aria-hidden className="hidden lg:block size-5 text-gray-400" />
                 </button>
 
@@ -278,6 +301,7 @@ export default function DashboardLayout({
                       type="button"
                       onClick={() => {
                         setUserMenuOpen(false);
+                        clearToken();
                         router.push("/login");
                       }}
                       role="menuitem"

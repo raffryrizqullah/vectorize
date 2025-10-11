@@ -2,24 +2,42 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CubeTransparentIcon } from "@heroicons/react/24/outline";
+import { loginRequest, TOKEN_STORAGE_KEY, getToken, meRequest } from "@/lib/api";
 
 export default function LoginPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  // If already authenticated, redirect to dashboard
+  useEffect(() => {
+    const token = getToken();
+    if (!token) return;
+    meRequest(token)
+      .then(() => router.replace("/dashboard"))
+      .catch(() => {/* ignore */});
+  }, [router]);
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = new FormData(e.currentTarget);
     const username = String(form.get("username") || "").trim();
     const password = String(form.get("password") || "").trim();
-
-    if (username === "admin" && password === "admin123") {
+    setLoading(true);
+    try {
+      const resp = await loginRequest(username, password);
+      // simpan token untuk sesi berikutnya
+      if (typeof window !== "undefined") {
+        localStorage.setItem(TOKEN_STORAGE_KEY, resp.access_token);
+      }
       setError(null);
       router.push("/dashboard");
-    } else {
-      setError("Username atau password salah");
+    } catch (err: any) {
+      setError(err?.message || "Login gagal");
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -126,9 +144,10 @@ export default function LoginPage() {
                   <div>
                     <button
                       type="submit"
-                      className="flex w-full justify-center rounded-md bg-primary px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                      className="flex w-full justify-center rounded-md bg-primary px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:opacity-60"
+                      disabled={loading}
                     >
-                      Sign in
+                      {loading ? "Signing in..." : "Sign in"}
                     </button>
                   </div>
                   {error && (
