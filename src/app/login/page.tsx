@@ -36,7 +36,7 @@ export default function LoginPage() {
         <div className="flex flex-1 flex-col justify-center px-4 py-12 sm:px-6 lg:basis-1/2 lg:flex-1 lg:px-20 xl:px-24">
           <div className="mx-auto w-full max-w-sm lg:w-96">
             <div>
-              <CubeTransparentIcon aria-hidden="true" className="h-10 w-10 text-indigo-600" />
+              <CubeTransparentIcon aria-hidden="true" className="h-10 w-10 text-primary" />
               <h2 className="mt-8 text-2xl/9 font-bold tracking-tight text-gray-900">Sign in to your account</h2>
             </div>
 
@@ -54,7 +54,7 @@ export default function LoginPage() {
                         type="text"
                         required
                         autoComplete="username"
-                        className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                        className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-primary sm:text-sm/6"
                       />
                     </div>
                   </div>
@@ -70,7 +70,7 @@ export default function LoginPage() {
                         type="password"
                         required
                         autoComplete="current-password"
-                        className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                        className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-primary sm:text-sm/6"
                       />
                     </div>
                   </div>
@@ -83,7 +83,7 @@ export default function LoginPage() {
                             id="remember-me"
                             name="remember-me"
                             type="checkbox"
-                            className="col-start-1 row-start-1 appearance-none rounded-sm border border-gray-300 bg-white checked:border-indigo-600 checked:bg-indigo-600 indeterminate:border-indigo-600 indeterminate:bg-indigo-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:checked:bg-gray-100 forced-colors:appearance-auto"
+                            className="col-start-1 row-start-1 appearance-none rounded-sm border border-gray-300 bg-white checked:border-primary checked:bg-primary indeterminate:border-primary indeterminate:bg-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:border-gray-300 disabled:bg-gray-100 disabled:checked:bg-gray-100 forced-colors:appearance-auto"
                           />
                           <svg
                             fill="none"
@@ -113,7 +113,7 @@ export default function LoginPage() {
                     </div>
 
                     <div className="text-sm/6">
-                      <a href="#" className="font-semibold text-indigo-600 hover:text-indigo-500">
+                      <a href="#" className="font-semibold text-primary hover:opacity-90">
                         Forgot password?
                       </a>
                     </div>
@@ -122,7 +122,7 @@ export default function LoginPage() {
                   <div>
                     <button
                       type="submit"
-                      className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                      className="flex w-full justify-center rounded-md bg-primary px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                     >
                       Sign in
                     </button>

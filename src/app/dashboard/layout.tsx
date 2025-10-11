@@ -65,7 +65,7 @@ export default function DashboardLayout({
             onClick={() => setSidebarOpen(false)}
             aria-hidden="true"
           />
-          <div className="relative ml-0 flex w-full max-w-xs flex-1 bg-indigo-600 px-6 pb-4">
+          <div className="relative ml-0 flex w-full max-w-xs flex-1 bg-primary px-6 pb-4">
             <button
               type="button"
               onClick={() => setSidebarOpen(false)}
@@ -89,14 +89,14 @@ export default function DashboardLayout({
                             onClick={() => setSidebarOpen(false)}
                             className={classNames(
                               isActive(item.href)
-                                ? "bg-indigo-700 text-white"
-                                : "text-indigo-200 hover:bg-indigo-700 hover:text-white",
+                                ? "bg-primary text-white"
+                                : "text-white hover:bg-white/10",
                               "group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold",
                             )}
                           >
                             <item.icon
                               className={classNames(
-                                isActive(item.href) ? "text-white" : "text-indigo-200 group-hover:text-white",
+                                isActive(item.href) ? "text-white" : "text-white",
                                 "size-6 shrink-0",
                               )}
                               aria-hidden="true"
@@ -112,13 +112,13 @@ export default function DashboardLayout({
                       href="/dashboard/settings"
                       className={classNames(
                         isActive("/dashboard/settings")
-                          ? "bg-indigo-700 text-white"
-                          : "text-indigo-200 hover:bg-indigo-700 hover:text-white",
+                          ? "bg-primary text-white"
+                          : "text-white hover:bg-white/10",
                         "group -mx-2 flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold",
                       )}
                     >
                       <Cog6ToothIcon className={classNames(
-                        isActive("/dashboard/settings") ? "text-white" : "text-indigo-200 group-hover:text-white",
+                        isActive("/dashboard/settings") ? "text-white" : "text-white",
                         "size-6 shrink-0",
                       )} aria-hidden="true" />
                       Settings
@@ -133,7 +133,7 @@ export default function DashboardLayout({
 
       {/* Static sidebar for desktop */}
       <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
-        <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-indigo-600 px-6 pb-4">
+        <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-primary px-6 pb-4">
           <div className="flex h-16 shrink-0 items-center">
             <CubeTransparentIcon aria-hidden className="h-8 w-8 text-white" />
           </div>
@@ -145,16 +145,16 @@ export default function DashboardLayout({
                     <li key={item.name}>
                       <Link
                         href={item.href}
-                        className={classNames(
-                          isActive(item.href)
-                            ? "bg-indigo-700 text-white"
-                            : "text-indigo-200 hover:bg-indigo-700 hover:text-white",
-                          "group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold",
-                        )}
+                      className={classNames(
+                        isActive(item.href)
+                          ? "bg-primary text-white"
+                          : "text-white hover:bg-white/10",
+                        "group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold",
+                      )}
                       >
                         <item.icon
                           className={classNames(
-                            isActive(item.href) ? "text-white" : "text-indigo-200 group-hover:text-white",
+                            isActive(item.href) ? "text-white" : "text-white",
                             "size-6 shrink-0",
                           )}
                           aria-hidden="true"
@@ -170,13 +170,13 @@ export default function DashboardLayout({
                   href="/dashboard/settings"
                   className={classNames(
                     isActive("/dashboard/settings")
-                      ? "bg-indigo-700 text-white"
-                      : "text-indigo-200 hover:bg-indigo-700 hover:text-white",
+                      ? "bg-primary text-white"
+                      : "text-white hover:bg-white/10",
                     "group -mx-2 flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold",
                   )}
                 >
                   <Cog6ToothIcon className={classNames(
-                    isActive("/dashboard/settings") ? "text-white" : "text-indigo-200 group-hover:text-white",
+                    isActive("/dashboard/settings") ? "text-white" : "text-white",
                     "size-6 shrink-0",
                   )} aria-hidden="true" />
                   Settings
@@ -190,7 +190,7 @@ export default function DashboardLayout({
       {/* Main area */}
       <div className="lg:pl-72">
         {/* Top bar */}
-        <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-xs sm:gap-x-6 sm:px-6 lg:px-8">
+        <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-background px-4 shadow-xs sm:gap-x-6 sm:px-6 lg:px-8">
           <button
             type="button"
             onClick={() => setSidebarOpen(true)}
@@ -209,7 +209,7 @@ export default function DashboardLayout({
                 type="search"
                 placeholder="Search"
                 aria-label="Search"
-                className="col-start-1 row-start-1 block size-full bg-white pl-8 text-base text-gray-900 outline-hidden placeholder:text-gray-400 sm:text-sm/6"
+                className="col-start-1 row-start-1 block size-full pl-8 text-base text-gray-900 outline-hidden placeholder:text-gray-400 sm:text-sm/6"
               />
               <MagnifyingGlassIcon aria-hidden="true" className="pointer-events-none col-start-1 row-start-1 size-5 self-center text-gray-400" />
             </form>
