@@ -76,7 +76,10 @@ export default function DashboardLayout({
             </button>
             <div className="mt-12 flex w-full flex-col gap-y-5 overflow-y-auto">
               <div className="flex h-16 shrink-0 items-center">
-                <CubeTransparentIcon aria-hidden className="h-8 w-8 text-white" />
+                <Link href="/dashboard" className="inline-block" onClick={() => setSidebarOpen(false)}>
+                  <span className="sr-only">Dashboard</span>
+                  <CubeTransparentIcon aria-hidden className="h-8 w-8 text-white" />
+                </Link>
               </div>
               <nav className="flex flex-1 flex-col">
                 <ul role="list" className="flex flex-1 flex-col gap-y-7">
@@ -135,7 +138,10 @@ export default function DashboardLayout({
       <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
         <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-primary px-6 pb-4">
           <div className="flex h-16 shrink-0 items-center">
-            <CubeTransparentIcon aria-hidden className="h-8 w-8 text-white" />
+            <Link href="/dashboard" className="inline-block">
+              <span className="sr-only">Dashboard</span>
+              <CubeTransparentIcon aria-hidden className="h-8 w-8 text-white" />
+            </Link>
           </div>
           <nav className="flex flex-1 flex-col">
             <ul role="list" className="flex flex-1 flex-col gap-y-7">

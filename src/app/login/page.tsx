@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { CubeTransparentIcon } from "@heroicons/react/24/outline";
@@ -36,7 +37,10 @@ export default function LoginPage() {
         <div className="flex flex-1 flex-col justify-center px-4 py-12 sm:px-6 lg:basis-1/2 lg:flex-1 lg:px-20 xl:px-24">
           <div className="mx-auto w-full max-w-sm lg:w-96">
             <div>
-              <CubeTransparentIcon aria-hidden="true" className="h-10 w-10 text-primary" />
+              <Link href="/" className="inline-block">
+                <span className="sr-only">Home</span>
+                <CubeTransparentIcon aria-hidden="true" className="h-10 w-10 text-primary" />
+              </Link>
               <h2 className="mt-8 text-2xl/9 font-bold tracking-tight text-gray-900">Sign in to your account</h2>
             </div>
 
