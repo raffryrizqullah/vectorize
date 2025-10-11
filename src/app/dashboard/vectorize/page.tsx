@@ -171,7 +171,7 @@ export default function VectorizePage() {
         {/* Source links dynamic + metadata */}
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <div>
-            <label className="block text-sm font-medium text-gray-900">Source links (opsional)</label>
+            <label className="field-label">Source links (opsional)</label>
             <div className="mt-1 space-y-2">
               {files.map((f, i) => (
                 <input
@@ -184,42 +184,42 @@ export default function VectorizePage() {
                     return next;
                   })}
                   placeholder={`Link untuk: ${f.file.name}`}
-                  className="block w-full rounded-md border border-gray-300 bg-white p-2 text-sm text-gray-900 focus:outline-2 focus:outline-primary"
+                  className="input"
                   disabled={loading}
                 />
               ))}
               {files.length === 0 && (
-                <p className="text-xs text-gray-500">Tambahkan file untuk memunculkan input source link per-file.</p>
+                <p className="hint">Tambahkan file untuk memunculkan input source link per-file.</p>
               )}
             </div>
-            <p className="mt-1 text-xs text-gray-500">Jumlah field otomatis mengikuti jumlah file.</p>
+            <p className="hint">Jumlah field otomatis mengikuti jumlah file.</p>
           </div>
           <div className="space-y-3">
             <div className="grid grid-cols-2 gap-3">
               <div className="col-span-2 sm:col-span-2">
-                <label className="block text-sm font-medium text-gray-900">Author</label>
+                <label className="field-label">Author</label>
                 <input
                   value={author}
                   onChange={(e) => setAuthor(e.target.value)}
                   placeholder="Nama penulis"
-                  className="mt-1 block w-full rounded-md border border-gray-300 bg-white p-2 text-sm text-gray-900 focus:outline-2 focus:outline-primary"
+                  className="input"
                   disabled={loading}
                 />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-sm font-medium text-gray-900">Department</label>
+                <label className="field-label">Department</label>
                 <input
                   value={department}
                   onChange={(e) => setDepartment(e.target.value)}
                   placeholder="Unit/Bidang"
-                  className="mt-1 block w-full rounded-md border border-gray-300 bg-white p-2 text-sm text-gray-900 focus:outline-2 focus:outline-primary"
+                  className="input"
                   disabled={loading}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-900">Sensitivitas</label>
+                <label className="field-label">Sensitivitas</label>
                 <div className="mt-1 inline-flex rounded-md border border-gray-300 bg-white p-0.5">
                   {(["public","internal"] as const).map((opt) => (
                     <button
@@ -236,7 +236,7 @@ export default function VectorizePage() {
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-900">Kategori</label>
+              <label className="field-label">Kategori</label>
               <div className="mt-1 grid grid-cols-1 gap-2 text-sm text-gray-700 sm:grid-cols-2">
                 {[
                   "Dokumentasi Sistem & Layanan",
@@ -267,7 +267,7 @@ export default function VectorizePage() {
             type="button"
             onClick={handleUpload}
             disabled={loading || files.length === 0}
-            className="rounded-md bg-primary px-3 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-60"
+            className="btn-primary"
           >
             {loading ? "Uploading..." : "Upload"}
           </button>
@@ -331,12 +331,12 @@ export default function VectorizePage() {
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
               placeholder='filter (URL-encoded JSON), contoh: {"content_type":{"$eq":"text"}}'
-              className="w-72 rounded-md border border-gray-300 bg-white p-2 text-xs text-gray-900 focus:outline-2 focus:outline-primary"
+              className="w-72 input text-xs"
             />
             <button
               type="button"
               onClick={refreshList}
-              className="rounded-md bg-primary px-3 py-1.5 text-sm font-semibold text-white hover:opacity-90"
+              className="btn-primary"
               disabled={fetchingList}
             >
               {fetchingList ? "Loading..." : "Refresh"}

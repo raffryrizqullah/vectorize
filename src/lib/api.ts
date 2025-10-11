@@ -109,6 +109,121 @@ export async function registerRequest(token: string, body: RegisterBody) {
   return data;
 }
 
+// Admin users list
+export type UserSummary = {
+  id: string;
+  username: string;
+  email: string;
+  full_name?: string | null;
+  role?: string | null;
+  is_active?: boolean;
+  created_at?: string;
+};
+
+export async function listUsers(
+  token: string,
+  opts?: { search?: string; role?: string; is_active?: boolean; limit?: number; offset?: number }
+): Promise<UserSummary[]> {
+  const params = new URLSearchParams();
+  if (opts?.search) params.set("search", opts.search);
+  if (opts?.role) params.set("role", opts.role);
+  if (typeof opts?.is_active === "boolean") params.set("is_active", String(opts.is_active));
+  if (opts?.limit) params.set("limit", String(opts.limit));
+  if (opts?.offset) params.set("offset", String(opts.offset));
+  const url = `${BASE_URL}/api/v1/admin/users${params.toString() ? `?${params}` : ""}`;
+
+  const res = await fetch(url, {
+    headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
+    cache: "no-store",
+  });
+  const ct = res.headers.get("content-type") || "";
+  const body = ct.includes("application/json") ? await res.json().catch(() => undefined) : undefined;
+  if (!res.ok) {
+    let message = "Failed to fetch users";
+    if (body) {
+      if (typeof body.detail === "string") message = body.detail;
+      else if (Array.isArray(body.detail)) message = body.detail.map((d: any) => d.msg || JSON.stringify(d)).join(", ");
+      else if (body.message) message = body.message;
+    }
+    throw new Error(message);
+  }
+  // Assume API returns array or object with users array
+  if (Array.isArray(body)) return body as UserSummary[];
+  if (body?.users && Array.isArray(body.users)) return body.users as UserSummary[];
+  return [];
+}
+
+// API Keys
+export type ApiKeyItem = {
+  id: string;
+  key_prefix: string;
+  name: string;
+  user_id: string;
+  username?: string;
+  is_active: boolean;
+  created_at?: string;
+  last_used_at?: string | null;
+  api_key?: string; // only on creation
+};
+
+export async function createApiKey(token: string, body: { user_id: string; name: string }): Promise<ApiKeyItem> {
+  const res = await fetch(`${BASE_URL}/api/v1/admin/api-keys`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(body),
+  });
+  const data = await res.json().catch(() => undefined);
+  if (!res.ok) throw new Error((data && (data.detail || data.message)) || "Failed to create API key");
+  return data as ApiKeyItem;
+}
+
+export async function listApiKeys(token: string): Promise<ApiKeyItem[]> {
+  const res = await fetch(`${BASE_URL}/api/v1/admin/api-keys`, {
+    headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
+    cache: "no-store",
+  });
+  const data = await res.json().catch(() => undefined);
+  if (!res.ok) throw new Error((data && (data.detail || data.message)) || "Failed to fetch API keys");
+  if (Array.isArray(data)) return data as ApiKeyItem[];
+  if (data?.api_keys) return data.api_keys as ApiKeyItem[];
+  return [];
+}
+
+export async function getApiKey(token: string, key_id: string): Promise<ApiKeyItem> {
+  const res = await fetch(`${BASE_URL}/api/v1/admin/api-keys/${key_id}`, {
+    headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
+  });
+  const data = await res.json().catch(() => undefined);
+  if (!res.ok) throw new Error((data && (data.detail || data.message)) || "Failed to get API key");
+  return data as ApiKeyItem;
+}
+
+export async function revokeApiKey(token: string, key_id: string): Promise<{ success: boolean } | ApiKeyItem> {
+  const res = await fetch(`${BASE_URL}/api/v1/admin/api-keys/${key_id}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
+  });
+  if (res.status === 204) return { success: true };
+  const data = await res.json().catch(() => undefined);
+  if (!res.ok) throw new Error((data && (data.detail || data.message)) || "Failed to revoke key");
+  return data as any;
+}
+
+export async function listApiKeysByUser(token: string, user_id: string): Promise<ApiKeyItem[]> {
+  const res = await fetch(`${BASE_URL}/api/v1/admin/users/${user_id}/api-keys`, {
+    headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
+  });
+  const data = await res.json().catch(() => undefined);
+  if (!res.ok) throw new Error((data && (data.detail || data.message)) || "Failed to fetch user's API keys");
+  if (Array.isArray(data)) return data as ApiKeyItem[];
+  if (data?.api_keys) return data.api_keys as ApiKeyItem[];
+  return [];
+}
+
 // Document upload
 export type UploadSingleResult = {
   document_id: string;

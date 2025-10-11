@@ -194,27 +194,27 @@ export default function HealthCheckPage() {
         </div>
       )}
 
-      <div className="flex items-center justify-between gap-4">
-        <h2 className="text-lg font-semibold text-gray-900">Health Monitoring</h2>
-        <div className="flex items-center gap-4">
-          <label className="flex items-center gap-2 text-sm text-gray-700">
+        <div className="flex items-center justify-between gap-4">
+          <h2 className="text-lg font-semibold text-gray-900">Health Monitoring</h2>
+          <div className="flex items-center gap-4">
+          <label className="flex items-center gap-2 text-sm text-gray-700 rounded-md border border-gray-300 bg-white px-2 py-1">
             <input type="checkbox" className="size-4 rounded border-gray-300" checked={deep} onChange={(e) => setDeep(e.target.checked)} />
             Deep mode
           </label>
-          <label className="flex items-center gap-2 text-sm text-gray-700">
+          <label className="flex items-center gap-2 text-sm text-gray-700 rounded-md border border-gray-300 bg-white px-2 py-1">
             <input type="checkbox" className="size-4 rounded border-gray-300" checked={autoRefresh} onChange={(e) => setAutoRefresh(e.target.checked)} />
             Auto refresh (30s)
           </label>
-          <button
-            type="button"
-            onClick={refresh}
-            className="rounded-md bg-primary px-3 py-1.5 text-sm font-semibold text-white hover:opacity-90"
-            disabled={loading}
-          >
-            {loading ? "Refreshing..." : "Refresh"}
-          </button>
+            <button
+              type="button"
+              onClick={refresh}
+            className="btn-primary"
+              disabled={loading}
+            >
+              {loading ? "Refreshing..." : "Refresh"}
+            </button>
+          </div>
         </div>
-      </div>
 
       <dl className="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {CARDS.map((c) => {
