@@ -2,7 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import "./widget.css";
-import { ChatBubbleLeftRightIcon, XMarkIcon, PaperAirplaneIcon, CpuChipIcon } from "@heroicons/react/24/outline";
+import { ChatBubbleLeftRightIcon, XMarkIcon, PaperAirplaneIcon } from "@heroicons/react/24/outline";
+import { formatQueryResponseToMarkdown, type QueryApiResponse } from "@/lib/format";
+import MarkdownLite from "@/components/chat/MarkdownLite";
 
 type Msg = { role: "user" | "ai" | "error"; text: string };
 
@@ -65,9 +67,9 @@ export default function ChatWidget() {
         headers,
         body: JSON.stringify({ question: text, session_id, include_sources: false }),
       });
-      const data = await res.json().catch(() => ({}));
+      const data: QueryApiResponse = await res.json().catch(() => ({} as any));
       if (!res.ok) throw new Error(data?.detail || data?.message || "Query failed");
-      const answer = data?.answer || "(no answer)";
+      const answer = formatQueryResponseToMarkdown(data, { topK: 3 });
       setMessages((m) => {
         // replace last "Thinking..." with answer
         const copy = m.slice();
@@ -122,10 +124,15 @@ export default function ChatWidget() {
         <ul ref={chatListRef} className="chatbox">
           {messages.map((m, i) => (
             <li key={i} className={`chat ${m.role === "user" ? "outgoing" : "incoming"}`}>
-              {m.role !== "user" && (
-                <span className="icon"><CpuChipIcon className="h-5 w-5 text-white" /></span>
+              {m.role === "user" ? (
+                <p>{m.text}</p>
+              ) : m.role === "error" ? (
+                <p className="error">{m.text}</p>
+              ) : (
+                <div className="bubble">
+                  <MarkdownLite text={m.text} />
+                </div>
               )}
-              <p className={m.role === "error" ? "error" : undefined}>{m.text}</p>
             </li>
           ))}
         </ul>
@@ -147,4 +154,3 @@ export default function ChatWidget() {
     </div>
   );
 }
-

@@ -24,6 +24,7 @@ import {
   Cog6ToothIcon as CogSolidIcon,
 } from "@heroicons/react/20/solid";
 import { clearToken, getToken, meRequest } from "@/lib/api";
+import ChatWidget from "@/components/chat/Widget";
 
 type NavItem = {
   name: string;
@@ -320,6 +321,9 @@ export default function DashboardLayout({
           <div className="px-4 sm:px-6 lg:px-8">{children}</div>
         </main>
       </div>
+
+      {/* Chat widget only for dashboard area */}
+      <ChatWidget />
     </div>
   );
 }

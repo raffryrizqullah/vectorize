@@ -27,11 +27,24 @@
 
 .cw .chatbox { overflow-y: auto; height: 510px; padding: 30px 20px 100px; }
 .cw .chatbox .chat { display: flex; list-style: none; }
-.cw .chatbox .outgoing { margin: 20px 0; justify-content: flex-end; }
-.cw .chatbox .incoming span.icon { width: 32px; height: 32px; color: #fff; text-align: center; line-height: 32px; align-self: flex-end; background: var(--color-primary, #0414d7); border-radius: 4px; margin: 0 10px 7px 0; display: inline-flex; align-items: center; justify-content: center; }
-.cw .chatbox .chat p { white-space: pre-wrap; padding: 12px 16px; border-radius: 10px 10px 0 10px; max-width: 75%; color: #fff; font-size: .95rem; background: var(--color-primary, #0414d7); }
-.cw .chatbox .incoming p { color: #000; background: #f2f2f2; border-radius: 10px 10px 10px 0; }
+.cw .chatbox .chat { margin: 10px 0; }
+.cw .chatbox .outgoing { justify-content: flex-end; }
+.cw .chatbox .incoming span.icon { display: none; }
+/* Outgoing (user) bubble applies only to the direct p inside outgoing li */
+.cw .chatbox .outgoing > p { white-space: pre-wrap; padding: 10px 12px; border-radius: 20px 20px 6px 20px; max-width: 86%; color: #fff; font-size: 14px; line-height: 1.45; background: var(--color-primary, #0414d7); box-shadow: 0 1px 1.5px rgba(0,0,0,.12); }
+/* Remove generic incoming p bubble to avoid nested bubbles; incoming uses .bubble container */
+.cw .chatbox .incoming p { background: transparent; color: inherit; padding: 0; border-radius: 0; box-shadow: none; }
 .cw .chatbox .chat p.error { color: #721c24; background: #f8d7da; }
+
+/* Bubble container for markdown */
+.cw .chatbox .incoming .bubble { position: relative; color: #000; background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 20px 20px 20px 6px; padding: 10px 12px; max-width: 86%; font-size: 14px; line-height: 1.45; box-shadow: 0 1px 1.5px rgba(17,24,39,.06); }
+.cw .chatbox .incoming .bubble::after { content: ""; position: absolute; left: 12px; bottom: -6px; width: 12px; height: 12px; background: inherit; border-left: 1px solid #e5e7eb; border-bottom: 1px solid #e5e7eb; transform: rotate(45deg); border-bottom-left-radius: 3px; box-shadow: 0 1px 1px rgba(17,24,39,.04); }
+.cw .md p { margin: 0 0 .28rem; }
+.cw .md ul { margin: .25rem 0; padding-left: 1rem; }
+.cw .md li { margin: .08rem 0; }
+.cw .md a { color: #1d4ed8; text-decoration: underline; word-break: break-word; }
+.cw .md code { background: #f3f4f6; padding: 0 .25rem; border-radius: 4px; }
+.cw .md pre { background: #0f172a; color: #e5e7eb; padding: .55rem .75rem; border-radius: 8px; overflow: auto; }
 
 .cw .chat-input { display: flex; gap: 5px; position: absolute; bottom: 0; width: 100%; background: #fff; padding: 3px 20px; border-top: 1px solid #ddd; }
 .cw .chat-input textarea { height: 55px; width: 100%; border: none; outline: none; resize: none; max-height: 180px; padding: 15px 15px 15px 0; font-size: .95rem; }
@@ -44,4 +57,3 @@
   .cw .chatbox { height: 90%; padding: 25px 15px 100px; }
   .cw .chatbot header button { display: block; }
 }
-
