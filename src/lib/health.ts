@@ -85,6 +85,48 @@ export async function getAggregateHealth(): Promise<Record<string, HealthResult>
   }
 }
 
+// New summary endpoint helper
+export async function getHealthSummary(deep: boolean): Promise<Record<string, HealthResult>> {
+  try {
+    const token = getToken();
+    const url = `${BASE_URL}/api/v1/health/summary${deep ? "?deep=true" : ""}`;
+    const res = await fetch(url, {
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      cache: "no-store",
+    });
+    const body = await safeJson(res);
+    if (!res.ok || !body) return {};
+
+    const out: Record<string, HealthResult> = {};
+    // top-level api
+    const apiStatus = String(body.status ?? body.api?.status ?? "unknown");
+    out["api"] = {
+      ok: apiStatus === "healthy" || apiStatus === "ok" || apiStatus === "true",
+      status: apiStatus,
+      timestamp: body.timestamp || body.api?.timestamp,
+      version: body.version || body.api?.version,
+      raw: body.api || body,
+    };
+    const source = body.services || body; // allow flat responses
+    const keys = ["pinecone", "openai", "redis", "database", "storage"];
+    for (const k of keys) {
+      const val: any = source[k];
+      if (!val) continue;
+      const st = String(val?.status ?? val?.ok ?? "unknown");
+      out[k] = {
+        ok: st === "healthy" || st === "ok" || st === "true",
+        status: st,
+        timestamp: val?.timestamp,
+        version: val?.version,
+        raw: val,
+      };
+    }
+    return out;
+  } catch {
+    return {};
+  }
+}
+
 export async function getPineconeHealth(): Promise<HealthResult> {
   // Try a likely endpoint; fall back to API health if the response includes service statuses
   try {

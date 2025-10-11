@@ -9,6 +9,7 @@ import {
   getDatabaseHealthDeep,
   getStorageHealthDeep,
   getAggregateHealth,
+  getHealthSummary,
   type HealthResult,
 } from "@/lib/health";
 import { ServerIcon, BoltIcon, CircleStackIcon, CloudIcon, CubeIcon, CpuChipIcon } from "@heroicons/react/24/outline";
@@ -78,11 +79,18 @@ export default function HealthCheckPage() {
   const [loading, setLoading] = useState(false);
   const [lastRefresh, setLastRefresh] = useState<string | null>(null);
   const [latency, setLatency] = useState<Record<string, number[]>>({});
+  const [autoRefresh, setAutoRefresh] = useState<boolean>(false);
+  const [deep, setDeep] = useState<boolean>(true);
 
   const refresh = useCallback(async () => {
     setLoading(true);
-    // First try to fetch aggregate
-    const aggregate = await getAggregateHealth();
+    // Prefer new summary endpoint
+    const t0 = performance.now();
+    const summary = await getHealthSummary(deep);
+    const msSummary = Math.round(performance.now() - t0);
+
+    // First try to fetch aggregate (legacy) and merge
+    const aggregate = Object.keys(summary).length ? summary : await getAggregateHealth();
     const initialKeys = new Set(Object.keys(aggregate));
 
     // For cards not in aggregate, fetch individually and capture latency
@@ -107,7 +115,12 @@ export default function HealthCheckPage() {
     const newLatency: Record<string, number[]> = {};
     for (const c of CARDS) {
       const k = `health_latency_${c.key}`;
-      const arr = JSON.parse(localStorage.getItem(k) || "[]");
+      let arr = JSON.parse(localStorage.getItem(k) || "[]");
+      // If the service came from summary in this run, push msSummary
+      if (initialKeys.has(c.key)) {
+        arr = [...arr, msSummary].slice(-10);
+        localStorage.setItem(k, JSON.stringify(arr));
+      }
       if (Array.isArray(arr)) newLatency[c.key] = arr;
     }
     setLatency(newLatency);
@@ -143,6 +156,15 @@ export default function HealthCheckPage() {
     refresh();
   }, [refresh]);
 
+  // Auto refresh effect
+  useEffect(() => {
+    if (!autoRefresh) return;
+    const id = setInterval(() => {
+      refresh();
+    }, 30000); // 30s
+    return () => clearInterval(id);
+  }, [autoRefresh, refresh]);
+
   const anyDown = useMemo(() =>
     Object.values(results).some((r) => r && (r.status === "down" || r.ok === false)),
   [results]);
@@ -155,16 +177,26 @@ export default function HealthCheckPage() {
         </div>
       )}
 
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-4">
         <h2 className="text-lg font-semibold text-gray-900">Health Monitoring</h2>
-        <button
-          type="button"
-          onClick={refresh}
-          className="rounded-md bg-primary px-3 py-1.5 text-sm font-semibold text-white hover:opacity-90"
-          disabled={loading}
-        >
-          {loading ? "Refreshing..." : "Refresh"}
-        </button>
+        <div className="flex items-center gap-4">
+          <label className="flex items-center gap-2 text-sm text-gray-700">
+            <input type="checkbox" className="size-4 rounded border-gray-300" checked={deep} onChange={(e) => setDeep(e.target.checked)} />
+            Deep mode
+          </label>
+          <label className="flex items-center gap-2 text-sm text-gray-700">
+            <input type="checkbox" className="size-4 rounded border-gray-300" checked={autoRefresh} onChange={(e) => setAutoRefresh(e.target.checked)} />
+            Auto refresh (30s)
+          </label>
+          <button
+            type="button"
+            onClick={refresh}
+            className="rounded-md bg-primary px-3 py-1.5 text-sm font-semibold text-white hover:opacity-90"
+            disabled={loading}
+          >
+            {loading ? "Refreshing..." : "Refresh"}
+          </button>
+        </div>
       </div>
 
       <dl className="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
