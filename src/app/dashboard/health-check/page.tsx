@@ -13,6 +13,8 @@ import {
   type HealthResult,
 } from "@/lib/health";
 import { ServerIcon, BoltIcon, CircleStackIcon, CloudIcon, CubeIcon, CpuChipIcon } from "@heroicons/react/24/outline";
+import dynamic from "next/dynamic";
+const HealthLineChart = dynamic(() => import("@/components/HealthLineChart"), { ssr: false });
 
 type CardKey = "api" | "pinecone" | "openai" | "redis" | "database" | "storage";
 type Card = { key: CardKey; title: string; fetcher: () => Promise<HealthResult>; icon: (props: any) => JSX.Element };
@@ -235,7 +237,7 @@ export default function HealthCheckPage() {
                 </div>
                 {Array.isArray(latency[c.key]) && latency[c.key].length > 0 && (
                   <div className="mt-2">
-                    <Sparkline points={latency[c.key]} />
+                    <HealthLineChart points={latency[c.key]} height={28} />
                     <div className="mt-1 text-[10px] text-gray-500">latency last {latency[c.key].length} checks (ms)</div>
                   </div>
                 )}
