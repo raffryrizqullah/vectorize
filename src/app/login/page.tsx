@@ -81,14 +81,30 @@ export default function LoginPage() {
         ```
       */}
       <div className="flex min-h-screen flex-1">
-        <div className="flex flex-1 flex-col justify-center px-4 py-12 sm:px-6 lg:basis-1/2 lg:flex-1 lg:px-20 xl:px-24">
+        <div className="relative hidden flex-1 overflow-hidden bg-secondary/5 lg:flex lg:basis-1/2">
+          <Silk speed={4.2} scale={1.25} noiseIntensity={1} color="#06337b" rotation={0.35} />
+          <div className="absolute inset-x-12 bottom-16 max-w-sm text-white">
+            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-white/60">A Wise Quote</p>
+            <div className="mt-6 h-px w-16 bg-white/40" />
+            <h2 className="mt-8 text-4xl font-serif leading-tight text-white">
+              Get Everything <br /> You Want
+            </h2>
+            <p className="mt-5 text-sm text-white/80">
+              You can get everything you want if you work hard, trust the process, and stick to the plan.
+            </p>
+          </div>
+        </div>
+        <div className="flex flex-1 flex-col justify-center px-4 py-12 sm:px-6 lg:basis-1/2 lg:px-20 xl:px-24">
           <div className="mx-auto w-full max-w-sm lg:w-96">
             <div>
               <Link href="/" className="inline-block">
                 <span className="sr-only">Home</span>
                 <CubeTransparentIcon aria-hidden="true" className="h-10 w-10 text-primary" />
               </Link>
-              <h2 className="mt-8 text-2xl/9 font-bold tracking-tight text-gray-900">Sign in to your account</h2>
+              <h2 className="mt-8 text-4xl font-bold tracking-tight text-gray-900">Welcome Back</h2>
+              <p className="mt-2 text-sm text-gray-500">
+                Enter your email and password to access your account.
+              </p>
             </div>
 
             <div className="mt-10">
@@ -142,7 +158,7 @@ export default function LoginPage() {
                             id="remember-me"
                             name="remember-me"
                             type="checkbox"
-                            className="col-start-1 row-start-1 appearance-none rounded-sm border border-gray-300 bg-white checked:border-primary checked:bg-primary indeterminate:border-primary indeterminate:bg-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:border-gray-300 disabled:bg-gray-100 disabled:checked:bg-gray-100 forced-colors:appearance-auto"
+                        className="col-start-1 row-start-1 appearance-none rounded-sm border border-gray-300 bg-white checked:border-primary checked:bg-primary indeterminate:border-primary indeterminate:bg-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:border-gray-300 disabled:bg-gray-100 disabled:checked:bg-gray-100 forced-colors:appearance-auto"
                           />
                           <svg
                             fill="none"
@@ -173,7 +189,7 @@ export default function LoginPage() {
 
                     <div className="text-sm/6">
                       <a href="#" className="font-semibold text-primary hover:opacity-90">
-                        Forgot password?
+                        Forgot Password?
                       </a>
                     </div>
                   </div>
@@ -192,12 +208,15 @@ export default function LoginPage() {
                   )}
 
                 </form>
+                <p className="mt-8 text-center text-sm text-gray-500">
+                  Don’t have an account?{" "}
+                  <a className="font-semibold text-primary hover:opacity-90" href="#">
+                    Sign up
+                  </a>
+                </p>
               </div>
             </div>
           </div>
-        </div>
-        <div className="relative hidden overflow-hidden bg-secondary/5 lg:block lg:basis-1/2 lg:flex-1">
-          <Silk speed={4} scale={1.2} noiseIntensity={1.1} color="#06337b" rotation={0.4} />
         </div>
       </div>
     </>
