@@ -7,10 +7,11 @@ import { useRouter } from "next/navigation";
 import { formatQueryResponseToMarkdown, type QueryApiResponse } from "@/lib/format";
 import MarkdownLite from "@/components/chat/MarkdownLite";
 import { loginRequest } from "@/lib/api";
+import { API_BASE_URL } from "@/lib/env";
 
 type Msg = { role: "user" | "ai" | "error"; text: string };
 
-const QUERY_URL = "http://127.0.0.1:8000/api/v1/query";
+const QUERY_URL = `${API_BASE_URL}/api/v1/query`;
 const SESSION_KEY = "chat_widget_session";
 // Use a chat-scoped token key to avoid affecting global dashboard auth
 const CHAT_TOKEN_KEY = "chat_widget_token";

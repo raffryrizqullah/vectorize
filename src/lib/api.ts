@@ -1,3 +1,6 @@
+import { API_BASE_URL } from "./env";
+import { httpDelete, httpGet, httpPost } from "./http";
+
 export type LoginResponse = {
   access_token: string;
   token_type: string;
@@ -11,8 +14,6 @@ export type LoginResponse = {
     created_at?: string;
   };
 };
-
-const BASE_URL = "http://127.0.0.1:8000";
 
 export const TOKEN_STORAGE_KEY = "jwt_token";
 
@@ -31,50 +32,41 @@ export async function loginRequest(
   username: string,
   password: string,
 ): Promise<LoginResponse> {
-  // Backend expects JSON (per Postman screenshot)
-  const res = await fetch(`${BASE_URL}/api/v1/auth/login`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
-    body: JSON.stringify({ username, password }),
-  });
-
   const sanitize = (text: any) => {
-    let s = typeof text === "string" ? text : (() => { try { return JSON.stringify(text); } catch { return String(text); } })();
+    let s =
+      typeof text === "string"
+        ? text
+        : (() => {
+            try {
+              return JSON.stringify(text);
+            } catch {
+              return String(text);
+            }
+          })();
     s = s.replace(/(sk-[A-Za-z0-9]{3})[A-Za-z0-9_-]{10,}/g, "$1***");
     s = s.replace(/eyJ[\w-]+\.[\w-]+\.[\w-]+/g, "***jwt***");
-    s = s.replace(/((?:mongodb\+srv|mongodb|postgresql?|mysql|redis|amqp|http|https):\/\/[^:\/@\s]+):[^@\s]+@/gi, "$1:***@");
+    s = s.replace(
+      /((?:mongodb\+srv|mongodb|postgresql?|mysql|redis|amqp|http|https):\/\/[^:\/@\s]+):[^@\s]+@/gi,
+      "$1:***@",
+    );
     s = s.replace(/("(?:password|secret|api_?key|token)"\s*:\s*")([^"]+)(")/gi, '$1***$3');
     s = s.replace(/("(?:connection_string|database_url|url|dsn)"\s*:\s*")([^"]+)(")/gi, '$1***$3');
     return s;
   };
 
-  const ct = res.headers.get("content-type") || "";
-  const body = ct.includes("application/json") ? await res.json().catch(() => undefined) : undefined;
-  if (!res.ok) {
-    let message = "Login failed";
-    if (body) {
-      if (typeof body.detail === "string") message = body.detail;
-      else if (Array.isArray(body.detail)) message = body.detail.map((d: any) => d.msg || JSON.stringify(d)).join(", ");
-      else if (body.message) message = body.message;
-    }
-    throw new Error(sanitize(message));
+  try {
+    return await httpPost<LoginResponse>(
+      "/api/v1/auth/login",
+      { username, password },
+      { headers: { Accept: "application/json" } },
+    );
+  } catch (error: any) {
+    throw new Error(sanitize(error?.message || "Login failed"));
   }
-  return body as LoginResponse;
 }
 
 export async function meRequest(token: string) {
-  const res = await fetch(`${BASE_URL}/api/v1/auth/me`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-  if (!res.ok) {
-    throw new Error("Failed to fetch profile");
-  }
-  return res.json();
+  return httpGet("/api/v1/auth/me", { token });
 }
 
 export type RegisterBody = {
@@ -86,27 +78,7 @@ export type RegisterBody = {
 };
 
 export async function registerRequest(token: string, body: RegisterBody) {
-  const res = await fetch(`${BASE_URL}/api/v1/auth/register`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(body),
-  });
-  const ct = res.headers.get("content-type") || "";
-  const data = ct.includes("application/json") ? await res.json().catch(() => undefined) : undefined;
-  if (!res.ok) {
-    let message = "Register failed";
-    if (data) {
-      if (typeof data.detail === "string") message = data.detail;
-      else if (Array.isArray(data.detail)) message = data.detail.map((d: any) => d.msg || JSON.stringify(d)).join(", ");
-      else if (data.message) message = data.message;
-    }
-    throw new Error(message);
-  }
-  return data;
+  return httpPost("/api/v1/auth/register", body, { token });
 }
 
 // Admin users list
@@ -124,29 +96,15 @@ export async function listUsers(
   token: string,
   opts?: { search?: string; role?: string; is_active?: boolean; limit?: number; offset?: number }
 ): Promise<UserSummary[]> {
-  const params = new URLSearchParams();
-  if (opts?.search) params.set("search", opts.search);
-  if (opts?.role) params.set("role", opts.role);
-  if (typeof opts?.is_active === "boolean") params.set("is_active", String(opts.is_active));
-  if (opts?.limit) params.set("limit", String(opts.limit));
-  if (opts?.offset) params.set("offset", String(opts.offset));
-  const url = `${BASE_URL}/api/v1/admin/users${params.toString() ? `?${params}` : ""}`;
+  const searchParams: Record<string, string | undefined> = {
+    search: opts?.search || undefined,
+    role: opts?.role || undefined,
+    is_active: typeof opts?.is_active === "boolean" ? String(opts.is_active) : undefined,
+    limit: opts?.limit !== undefined ? String(opts.limit) : undefined,
+    offset: opts?.offset !== undefined ? String(opts.offset) : undefined,
+  };
 
-  const res = await fetch(url, {
-    headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
-    cache: "no-store",
-  });
-  const ct = res.headers.get("content-type") || "";
-  const body = ct.includes("application/json") ? await res.json().catch(() => undefined) : undefined;
-  if (!res.ok) {
-    let message = "Failed to fetch users";
-    if (body) {
-      if (typeof body.detail === "string") message = body.detail;
-      else if (Array.isArray(body.detail)) message = body.detail.map((d: any) => d.msg || JSON.stringify(d)).join(", ");
-      else if (body.message) message = body.message;
-    }
-    throw new Error(message);
-  }
+  const body = await httpGet<any>("/api/v1/admin/users", { token, searchParams });
   // Assume API returns array or object with users array
   if (Array.isArray(body)) return body as UserSummary[];
   if (body?.users && Array.isArray(body.users)) return body.users as UserSummary[];
@@ -167,58 +125,27 @@ export type ApiKeyItem = {
 };
 
 export async function createApiKey(token: string, body: { user_id: string; name: string }): Promise<ApiKeyItem> {
-  const res = await fetch(`${BASE_URL}/api/v1/admin/api-keys`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(body),
-  });
-  const data = await res.json().catch(() => undefined);
-  if (!res.ok) throw new Error((data && (data.detail || data.message)) || "Failed to create API key");
-  return data as ApiKeyItem;
+  return httpPost<ApiKeyItem>("/api/v1/admin/api-keys", body, { token });
 }
 
 export async function listApiKeys(token: string): Promise<ApiKeyItem[]> {
-  const res = await fetch(`${BASE_URL}/api/v1/admin/api-keys`, {
-    headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
-    cache: "no-store",
-  });
-  const data = await res.json().catch(() => undefined);
-  if (!res.ok) throw new Error((data && (data.detail || data.message)) || "Failed to fetch API keys");
+  const data = await httpGet<any>("/api/v1/admin/api-keys", { token });
   if (Array.isArray(data)) return data as ApiKeyItem[];
   if (data?.api_keys) return data.api_keys as ApiKeyItem[];
   return [];
 }
 
 export async function getApiKey(token: string, key_id: string): Promise<ApiKeyItem> {
-  const res = await fetch(`${BASE_URL}/api/v1/admin/api-keys/${key_id}`, {
-    headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
-  });
-  const data = await res.json().catch(() => undefined);
-  if (!res.ok) throw new Error((data && (data.detail || data.message)) || "Failed to get API key");
-  return data as ApiKeyItem;
+  return httpGet<ApiKeyItem>(`/api/v1/admin/api-keys/${key_id}`, { token });
 }
 
-export async function revokeApiKey(token: string, key_id: string): Promise<{ success: boolean } | ApiKeyItem> {
-  const res = await fetch(`${BASE_URL}/api/v1/admin/api-keys/${key_id}`, {
-    method: "DELETE",
-    headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
-  });
-  if (res.status === 204) return { success: true };
-  const data = await res.json().catch(() => undefined);
-  if (!res.ok) throw new Error((data && (data.detail || data.message)) || "Failed to revoke key");
-  return data as any;
+export async function revokeApiKey(token: string, key_id: string): Promise<{ success: boolean }> {
+  await httpDelete(`/api/v1/admin/api-keys/${key_id}`, { token });
+  return { success: true };
 }
 
 export async function listApiKeysByUser(token: string, user_id: string): Promise<ApiKeyItem[]> {
-  const res = await fetch(`${BASE_URL}/api/v1/admin/users/${user_id}/api-keys`, {
-    headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
-  });
-  const data = await res.json().catch(() => undefined);
-  if (!res.ok) throw new Error((data && (data.detail || data.message)) || "Failed to fetch user's API keys");
+  const data = await httpGet<any>(`/api/v1/admin/users/${user_id}/api-keys`, { token });
   if (Array.isArray(data)) return data as ApiKeyItem[];
   if (data?.api_keys) return data.api_keys as ApiKeyItem[];
   return [];
@@ -266,7 +193,7 @@ export async function uploadDocuments(
     form.append("custom_metadata", JSON.stringify(customMetadata));
   }
 
-  const res = await fetch(`${BASE_URL}/api/v1/documents/upload`, {
+  const res = await fetch(`${API_BASE_URL}/api/v1/documents/upload`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -312,31 +239,12 @@ export async function listDocuments(
   token: string,
   opts?: { filter?: string; limit?: number; namespace?: string }
 ): Promise<DocumentsListResponse> {
-  const params = new URLSearchParams();
-  if (opts?.filter) params.set("filter", opts.filter);
-  if (opts?.limit) params.set("limit", String(opts.limit));
-  if (opts?.namespace) params.set("namespace", opts.namespace);
-  const url = `${BASE_URL}/api/v1/documents/list${params.toString() ? `?${params.toString()}` : ""}`;
-
-  const res = await fetch(url, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      Accept: "application/json",
-    },
-    cache: "no-store",
-  });
-  const ct = res.headers.get("content-type") || "";
-  const body = ct.includes("application/json") ? await res.json().catch(() => undefined) : undefined;
-  if (!res.ok) {
-    let message = "Failed to fetch documents";
-    if (body) {
-      if (typeof body.detail === "string") message = body.detail;
-      else if (Array.isArray(body.detail)) message = body.detail.map((d: any) => d.msg || JSON.stringify(d)).join(", ");
-      else if (body.message) message = body.message;
-    }
-    throw new Error(message);
-  }
-  return body as DocumentsListResponse;
+  const searchParams: Record<string, string | undefined> = {
+    filter: opts?.filter || undefined,
+    limit: opts?.limit !== undefined ? String(opts.limit) : undefined,
+    namespace: opts?.namespace || undefined,
+  };
+  return httpGet<DocumentsListResponse>("/api/v1/documents/list", { token, searchParams });
 }
 
 // Chat history
@@ -413,8 +321,8 @@ function normalizeHistoryEntry(entry: any, index: number): ChatHistoryMessage | 
 export async function listChatSessions(token?: string | null, opts?: { limit?: number }): Promise<ChatSessionInfo[]> {
   const query = opts?.limit ? `?limit=${encodeURIComponent(String(opts.limit))}` : "";
   const endpoints = [
-    `${BASE_URL}/api/v1/sessions${query}`,
-    `${BASE_URL}/api/v1/history`,
+    `${API_BASE_URL}/api/v1/sessions${query}`,
+    `${API_BASE_URL}/api/v1/history`,
   ];
 
   const collectFromData = (data: any) => {
@@ -485,15 +393,9 @@ export async function listChatSessions(token?: string | null, opts?: { limit?: n
 }
 
 export async function getChatHistory(session_id: string): Promise<ChatHistoryResult> {
-  const res = await fetch(`${BASE_URL}/api/v1/history/${encodeURIComponent(session_id)}`, {
+  const data = await httpGet<any>(`/api/v1/history/${encodeURIComponent(session_id)}`, {
     headers: { Accept: "application/json" },
-    cache: "no-store",
   });
-  const data = await res.json().catch(() => undefined);
-  if (!res.ok) {
-    const message = (data && (data.detail || data.message || data.error)) || "Failed to fetch chat history";
-    throw new Error(message);
-  }
   const collected: ChatHistoryMessage[] = [];
   const push = (value: any) => {
     if (value === undefined || value === null) return;
@@ -535,15 +437,9 @@ export async function getChatHistory(session_id: string): Promise<ChatHistoryRes
 }
 
 export async function getChatSessionMeta(session_id: string): Promise<ChatSessionInfo | null> {
-  const res = await fetch(`${BASE_URL}/api/v1/session/${encodeURIComponent(session_id)}`, {
+  const data = await httpGet<any>(`/api/v1/session/${encodeURIComponent(session_id)}`, {
     headers: { Accept: "application/json" },
-    cache: "no-store",
   });
-  const data = await res.json().catch(() => undefined);
-  if (!res.ok) {
-    const message = (data && (data.detail || data.message || data.error)) || "Failed to fetch session metadata";
-    throw new Error(message);
-  }
   if (Array.isArray(data)) {
     const first = data[0];
     return normalizeSessionEntry(first);
@@ -557,15 +453,8 @@ export async function getChatSessionMeta(session_id: string): Promise<ChatSessio
 }
 
 export async function clearChatHistory(session_id: string): Promise<boolean> {
-  const res = await fetch(`${BASE_URL}/api/v1/history/${encodeURIComponent(session_id)}`, {
-    method: "DELETE",
+  await httpDelete(`/api/v1/history/${encodeURIComponent(session_id)}`, {
     headers: { Accept: "application/json" },
   });
-  if (res.status === 204) return true;
-  if (!res.ok) {
-    const data = await res.json().catch(() => undefined);
-    const message = (data && (data.detail || data.message || data.error)) || "Failed to clear chat history";
-    throw new Error(message);
-  }
   return true;
 }

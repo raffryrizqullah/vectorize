@@ -1,6 +1,7 @@
 import { getToken } from "@/lib/api";
+import { API_BASE_URL } from "./env";
 
-const BASE_URL = "http://127.0.0.1:8000";
+const BASE_URL = API_BASE_URL;
 
 export type HealthResult = {
   ok: boolean;
