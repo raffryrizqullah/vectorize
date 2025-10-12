@@ -7,6 +7,7 @@ import { CubeTransparentIcon, EyeIcon, EyeSlashIcon } from "@heroicons/react/24/
 import { loginRequest, TOKEN_STORAGE_KEY, getToken, meRequest } from "@/lib/api";
 import { getHealthSummary } from "@/lib/health";
 import Silk from "@/components/Silk";
+import { fieldInputClass, alertStyles } from "@/styles/design";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -121,7 +122,7 @@ export default function LoginPage() {
                         type="text"
                         required
                         autoComplete="username"
-                        className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-primary sm:text-sm/6"
+                        className={fieldInputClass}
                       />
                     </div>
                   </div>
@@ -137,7 +138,7 @@ export default function LoginPage() {
                         type={showPwd ? "text" : "password"}
                         required
                         autoComplete="current-password"
-                        className="block w-full rounded-md bg-white px-3 py-1.5 pr-9 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-primary sm:text-sm/6"
+                        className={`${fieldInputClass} pr-12`}
                       />
                       <button
                         type="button"
@@ -203,9 +204,7 @@ export default function LoginPage() {
                       {loading ? "Signing in..." : "Sign in"}
                     </button>
                   </div>
-                  {error && (
-                    <p className="text-sm text-red-600">{error}</p>
-                  )}
+                  {error && <div className={alertStyles.error}>{error}</div>}
 
                 </form>
                 <p className="mt-8 text-center text-sm text-gray-500">

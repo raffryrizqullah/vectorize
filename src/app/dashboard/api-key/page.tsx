@@ -3,6 +3,14 @@
 import { useEffect, useState } from "react";
 import { getToken, createApiKey, listApiKeys, revokeApiKey, type ApiKeyItem } from "@/lib/api";
 import { KeyIcon } from "@heroicons/react/24/outline";
+import {
+  cardSurfaceClass,
+  primaryButtonClass,
+  secondaryButtonClass,
+  fieldInputClass,
+  alertStyles,
+  loadingToastClass,
+} from "@/styles/design";
 
 export default function ApiKeyPage() {
   const [name, setName] = useState("");
@@ -87,7 +95,7 @@ export default function ApiKeyPage() {
   return (
     <div className="space-y-4">
       {/* Create API key */}
-      <div className="rounded-lg border border-gray-200 bg-background p-6 shadow-xs">
+      <div className={cardSurfaceClass}>
         <div className="flex items-center gap-2">
           <span className="rounded-md bg-primary p-2"><KeyIcon className="size-5 text-white" /></span>
           <h2 className="text-lg font-semibold text-gray-900">Create API Key</h2>
@@ -95,38 +103,65 @@ export default function ApiKeyPage() {
         <form onSubmit={onCreate} className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
           <div className="sm:col-span-1">
             <label className="field-label">User ID</label>
-            <input value={userId} onChange={(e)=>setUserId(e.target.value)} className="input" placeholder="UUID user" required />
+            <input
+              value={userId}
+              onChange={(e) => setUserId(e.target.value)}
+              className={fieldInputClass}
+              placeholder="UUID user"
+              required
+            />
           </div>
           <div className="sm:col-span-1">
             <label className="field-label">Name</label>
-            <input value={name} onChange={(e)=>setName(e.target.value)} className="input" placeholder="Nama penggunaan key" required />
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className={fieldInputClass}
+              placeholder="Nama penggunaan key"
+              required
+            />
           </div>
           <div className="sm:col-span-1 flex items-end">
-            <button type="submit" className="btn-primary" disabled={creating}>{creating?"Creating...":"Create"}</button>
+            <button type="submit" className={primaryButtonClass} disabled={creating}>
+              {creating ? "Creating..." : "Create"}
+            </button>
           </div>
         </form>
-        {createError && <p className="mt-2 text-sm text-red-600">{createError}</p>}
+        {createError && <div className={`${alertStyles.error} mt-3`}>{createError}</div>}
         {createdKey && (
           <div className="mt-3 rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-800">
             <p className="font-medium">Copy your API key now (shown only once):</p>
             <div className="mt-2 flex items-center justify-between rounded bg-white px-3 py-2 text-gray-900">
               <span className="font-mono text-xs break-all">{createdKey}</span>
-              <button type="button" onClick={()=> createdKey && safeCopy(createdKey)} className="ml-3 rounded bg-primary px-2 py-1 text-xs text-white">Copy</button>
+              <button
+                type="button"
+                onClick={() => createdKey && safeCopy(createdKey)}
+                className="ml-3 rounded bg-primary px-3 py-1 text-xs font-semibold text-white hover:opacity-90"
+              >
+                Copy
+              </button>
             </div>
           </div>
         )}
       </div>
 
       {/* List API keys */}
-      <div className="rounded-lg border border-gray-200 bg-background p-6 shadow-xs">
-          <div className="flex items-center justify-between">
+      <div className={cardSurfaceClass}>
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="rounded-md bg-primary p-2"><KeyIcon className="size-5 text-white" /></span>
             <h2 className="text-lg font-semibold text-gray-900">API Keys</h2>
           </div>
-          <button type="button" onClick={refresh} className="btn-primary" disabled={loading}>{loading?"Loading...":"Refresh"}</button>
+          <button
+            type="button"
+            onClick={refresh}
+            className={secondaryButtonClass}
+            disabled={loading}
+          >
+            {loading ? "Loading..." : "Refresh"}
+          </button>
         </div>
-        {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+        {error && <div className={`${alertStyles.error} mt-3`}>{error}</div>}
         <div className="mt-4 overflow-x-auto max-h-[60vh] overflow-y-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -163,7 +198,13 @@ export default function ApiKeyPage() {
                     <td className="px-4 py-3 text-sm text-gray-700"><span className="font-mono text-xs">{format(k.created_at)}</span></td>
                     <td className="px-4 py-3 text-sm text-gray-700"><span className="font-mono text-xs">{format(k.last_used_at)}</span></td>
                     <td className="px-4 py-3 text-right">
-                      <button type="button" onClick={()=>onRevoke(k.id)} className="rounded bg-red-600 px-2 py-1 text-xs text-white hover:opacity-90">Revoke</button>
+                      <button
+                        type="button"
+                        onClick={() => onRevoke(k.id)}
+                        className="rounded-full bg-red-600 px-3 py-1 text-xs font-semibold text-white transition hover:bg-red-700"
+                      >
+                        Revoke
+                      </button>
                     </td>
                   </tr>
                 );
@@ -172,6 +213,12 @@ export default function ApiKeyPage() {
           </table>
         </div>
       </div>
+      {(loading || creating) && (
+        <div className={loadingToastClass}>
+          <span className="size-3 animate-spin rounded-full border-2 border-secondary/60 border-t-transparent" />
+          {loading ? "Memuat daftar API key..." : "Membuat API key..."}
+        </div>
+      )}
     </div>
   );
 }

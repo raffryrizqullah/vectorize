@@ -3,6 +3,14 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { getToken, uploadDocuments, listDocuments, type DocumentSummary } from "@/lib/api";
 import { CloudArrowUpIcon, DocumentTextIcon } from "@heroicons/react/24/outline";
+import {
+  cardSurfaceClass,
+  fieldInputClass,
+  fieldBaseClass,
+  primaryButtonClass,
+  secondaryButtonClass,
+  alertStyles,
+} from "@/styles/design";
 import { vectorizeUploadState } from "@/lib/vectorizeUploadState";
 
 type LocalFile = {
@@ -143,7 +151,7 @@ export default function VectorizePage() {
         </div>
       )}
       <div className={`space-y-4 ${loading ? "blur-[2px] pointer-events-none" : ""}`}>
-      <div className="rounded-lg border border-gray-200 bg-background p-6 shadow-xs">
+      <div className={cardSurfaceClass}>
         <div className="flex items-center gap-2">
           <span className="rounded-md bg-primary p-2"><CloudArrowUpIcon className="size-5 text-white" /></span>
           <h2 className="text-lg font-semibold text-gray-900">Upload Dokumen (PDF)</h2>
@@ -267,20 +275,20 @@ export default function VectorizePage() {
             type="button"
             onClick={handleUpload}
             disabled={loading || files.length === 0}
-            className="btn-primary"
+            className={primaryButtonClass}
           >
             {loading ? "Uploading..." : "Upload"}
           </button>
           <span className="text-xs text-gray-500">{files.length} file dipilih</span>
         </div>
 
-        {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
-        {successMsg && <p className="mt-3 text-sm text-green-700">{successMsg}</p>}
+        {error && <div className={`${alertStyles.error} mt-3`}>{error}</div>}
+        {successMsg && <div className={`${alertStyles.success} mt-3`}>{successMsg}</div>}
       </div>
 
       {/* List files */}
       {files.length > 0 && (
-        <div className="rounded-lg border border-gray-200 bg-background p-6 shadow-xs">
+        <div className={cardSurfaceClass}>
           <h3 className="text-base font-semibold text-gray-900">Daftar File</h3>
           <ul className="mt-3 divide-y divide-gray-200">
             {files.map((f, idx) => (
@@ -320,7 +328,7 @@ export default function VectorizePage() {
       )}
 
       {/* Documents table */}
-      <div className="rounded-lg border border-gray-200 bg-background p-6 shadow-xs">
+      <div className={cardSurfaceClass}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="rounded-md bg-primary p-2"><DocumentTextIcon className="size-5 text-white" /></span>
@@ -331,12 +339,12 @@ export default function VectorizePage() {
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
               placeholder='filter (URL-encoded JSON), contoh: {"content_type":{"$eq":"text"}}'
-              className="w-72 input text-xs"
+              className={`w-72 ${fieldBaseClass}`}
             />
             <button
               type="button"
               onClick={refreshList}
-              className="btn-primary"
+              className={secondaryButtonClass}
               disabled={fetchingList}
             >
               {fetchingList ? "Loading..." : "Refresh"}
@@ -344,7 +352,7 @@ export default function VectorizePage() {
           </div>
         </div>
 
-        {listError && <p className="mt-3 text-sm text-red-600">{listError}</p>}
+        {listError && <div className={`${alertStyles.error} mt-3`}>{listError}</div>}
 
         <div className="mt-4 overflow-x-auto max-h-[60vh] overflow-y-auto">
           <table className="min-w-full divide-y divide-gray-200">

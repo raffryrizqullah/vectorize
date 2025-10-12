@@ -25,6 +25,8 @@ import {
   alertStyles,
   loadingToastClass,
   toggleInputClass,
+  fieldInputClass,
+  fieldSelectClass,
 } from "@/styles/design";
 
 type PreferenceState = {
@@ -233,7 +235,7 @@ export default function SettingsPage() {
               <select
                 value={prefs.language}
                 onChange={(event) => handleSelect("language", event.target.value)}
-                className="mt-3 w-full rounded-2xl border border-secondary/10 bg-secondary/5 px-4 py-3 text-sm text-secondary"
+                className={`mt-3 ${fieldSelectClass}`}
               >
                 {languages.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -249,7 +251,7 @@ export default function SettingsPage() {
               <select
                 value={prefs.timezone}
                 onChange={(event) => handleSelect("timezone", event.target.value)}
-                className="mt-3 w-full rounded-2xl border border-secondary/10 bg-secondary/5 px-4 py-3 text-sm text-secondary"
+                className={`mt-3 ${fieldSelectClass}`}
               >
                 {timezoneOptions.map((zone) => (
                   <option key={zone} value={zone}>
@@ -268,7 +270,7 @@ export default function SettingsPage() {
                 max={240}
                 value={prefs.sessionTimeout}
                 onChange={(event) => handleSelect("sessionTimeout", Number(event.target.value))}
-                className="mt-3 w-full rounded-2xl border border-secondary/10 bg-secondary/5 px-4 py-3 text-sm text-secondary"
+                className={`mt-3 ${fieldInputClass}`}
               />
               <p className="mt-2 text-xs text-secondary/60">
                 After this period of inactivity users will be prompted to re-authenticate.
@@ -382,7 +384,7 @@ export default function SettingsPage() {
                 type="checkbox"
                 checked={prefs.multiFactor}
                 onChange={() => handleToggle("multiFactor")}
-                className={`${toggleInputClass} mt-0`}
+                className={toggleInputClass}
               />
             </label>
             <div className="rounded-2xl border border-secondary/10 bg-secondary/5 p-4 text-xs text-secondary/60">

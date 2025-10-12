@@ -13,6 +13,7 @@ import {
   type HealthResult,
 } from "@/lib/health";
 import { ServerIcon, BoltIcon, CircleStackIcon, CloudIcon, CubeIcon, CpuChipIcon } from "@heroicons/react/24/outline";
+import { secondaryButtonClass, toggleInputClass } from "@/styles/design";
 import dynamic from "next/dynamic";
 const MagicBento = dynamic(() => import("@/components/MagicBento"), { ssr: false });
 const CountUp = dynamic(() => import("@/components/CountUp"), { ssr: false });
@@ -282,18 +283,28 @@ export default function HealthCheckPage() {
         <div className="flex items-center justify-between gap-4">
           <h2 className="text-lg font-semibold text-gray-900">Health Monitoring</h2>
           <div className="flex items-center gap-4">
-          <label className="flex items-center gap-2 text-sm text-gray-700 rounded-md border border-gray-300 bg-white px-2 py-1">
-            <input type="checkbox" className="size-4 rounded border-gray-300" checked={deep} onChange={(e) => setDeep(e.target.checked)} />
-            Deep mode
-          </label>
-          <label className="flex items-center gap-2 text-sm text-gray-700 rounded-md border border-gray-300 bg-white px-2 py-1">
-            <input type="checkbox" className="size-4 rounded border-gray-300" checked={autoRefresh} onChange={(e) => setAutoRefresh(e.target.checked)} />
-            Auto refresh (30s)
-          </label>
+            <label className="flex items-center gap-2 rounded-2xl border border-secondary/10 bg-secondary/5 px-3 py-2 text-sm text-secondary/70">
+              <input
+                type="checkbox"
+                className={toggleInputClass}
+                checked={deep}
+                onChange={(e) => setDeep(e.target.checked)}
+              />
+              Deep mode
+            </label>
+            <label className="flex items-center gap-2 rounded-2xl border border-secondary/10 bg-secondary/5 px-3 py-2 text-sm text-secondary/70">
+              <input
+                type="checkbox"
+                className={toggleInputClass}
+                checked={autoRefresh}
+                onChange={(e) => setAutoRefresh(e.target.checked)}
+              />
+              Auto refresh (30s)
+            </label>
             <button
               type="button"
               onClick={refresh}
-            className="btn-primary"
+              className={secondaryButtonClass}
               disabled={loading}
             >
               {loading ? "Refreshing..." : "Refresh"}

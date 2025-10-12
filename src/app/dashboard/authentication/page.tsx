@@ -3,6 +3,17 @@
 import { useEffect, useState } from "react";
 import { getToken, meRequest, registerRequest, type RegisterBody, listUsers, type UserSummary } from "@/lib/api";
 import { UserCircleIcon, UserPlusIcon, EyeIcon, EyeSlashIcon, UsersIcon } from "@heroicons/react/24/outline";
+import {
+  cardSurfaceClass,
+  primaryButtonClass,
+  secondaryButtonClass,
+  fieldInputClass,
+  fieldSelectClass,
+  fieldBaseClass,
+  alertStyles,
+  toggleInputClass,
+  loadingToastClass,
+} from "@/styles/design";
 
 export default function AuthenticationPage() {
   const [me, setMe] = useState<any>(null);
@@ -84,7 +95,7 @@ export default function AuthenticationPage() {
 
   return (
     <div className="space-y-4">
-      <div className="rounded-lg border border-gray-200 bg-background p-6 shadow-xs">
+      <div className={cardSurfaceClass}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="rounded-md bg-primary p-2"><UserCircleIcon className="size-5 text-white" /></span>
@@ -92,7 +103,7 @@ export default function AuthenticationPage() {
           </div>
           <button
             type="button"
-            className="btn-primary"
+            className={secondaryButtonClass}
             onClick={() => {
               const token = getToken();
               if (!token) { setMeError("Tidak ada token"); return; }
@@ -107,7 +118,7 @@ export default function AuthenticationPage() {
             {meLoading ? "Loading..." : "Refresh"}
           </button>
         </div>
-        {meError && <p className="mt-2 text-sm text-red-600">{meError}</p>}
+        {meError && <div className={`${alertStyles.error} mt-3`}>{meError}</div>}
         {me && (
           <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
@@ -135,30 +146,61 @@ export default function AuthenticationPage() {
       </div>
 
       {/* Users table */}
-      <div className="rounded-lg border border-gray-200 bg-background p-6 shadow-xs">
+      <div className={cardSurfaceClass}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="rounded-md bg-primary p-2"><UsersIcon className="size-5 text-white" /></span>
             <h2 className="text-lg font-semibold text-gray-900">Users</h2>
           </div>
           <div className="flex items-center gap-2">
-            <input value={search} onChange={(e)=>setSearch(e.target.value)} placeholder="Search username/email" className="input w-56 text-xs" />
-            <select value={roleFilter} onChange={(e)=>setRoleFilter(e.target.value)} className="select text-xs w-40">
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search username/email"
+              className={`w-56 ${fieldBaseClass}`}
+            />
+            <select
+              value={roleFilter}
+              onChange={(e) => setRoleFilter(e.target.value)}
+              className={`w-40 ${fieldSelectClass}`}
+            >
               <option value="">All roles</option>
               <option value="student">student</option>
               <option value="lecturer">lecturer</option>
               <option value="admin">admin</option>
             </select>
-            <label className="flex items-center gap-2 text-sm text-gray-700 rounded-md border border-gray-300 bg-white px-2 py-1">
-              <input type="checkbox" className="size-4 rounded border-gray-300" checked={activeOnly} onChange={(e)=>setActiveOnly(e.target.checked)} />
+            <label className="flex items-center gap-2 rounded-2xl border border-secondary/10 bg-secondary/5 px-3 py-2 text-sm text-secondary/70">
+              <input
+                type="checkbox"
+                className={toggleInputClass}
+                checked={activeOnly}
+                onChange={(e) => setActiveOnly(e.target.checked)}
+              />
               Active only
             </label>
-            <input type="number" value={limit} onChange={(e)=>setLimit(Number(e.target.value)||0)} className="input w-20 text-xs" />
-            <input type="number" value={offset} onChange={(e)=>setOffset(Number(e.target.value)||0)} className="input w-20 text-xs" />
-            <button type="button" onClick={refreshUsers} className="btn-primary" disabled={usersLoading}>{usersLoading?"Loading...":"Refresh"}</button>
+            <input
+              type="number"
+              value={limit}
+              onChange={(e) => setLimit(Number(e.target.value) || 0)}
+              className={`w-20 ${fieldBaseClass}`}
+            />
+            <input
+              type="number"
+              value={offset}
+              onChange={(e) => setOffset(Number(e.target.value) || 0)}
+              className={`w-20 ${fieldBaseClass}`}
+            />
+            <button
+              type="button"
+              onClick={refreshUsers}
+              className={secondaryButtonClass}
+              disabled={usersLoading}
+            >
+              {usersLoading ? "Loading..." : "Refresh"}
+            </button>
           </div>
         </div>
-        {usersError && <p className="mt-2 text-sm text-red-600">{usersError}</p>}
+        {usersError && <div className={`${alertStyles.error} mt-3`}>{usersError}</div>}
         <div className="mt-4 overflow-x-auto max-h-[60vh] overflow-y-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -203,7 +245,7 @@ export default function AuthenticationPage() {
           </table>
         </div>
       </div>
-      <div className="rounded-lg border border-gray-200 bg-background p-6 shadow-xs">
+      <div className={cardSurfaceClass}>
         <div className="flex items-center gap-2">
           <span className="rounded-md bg-primary p-2"><UserPlusIcon className="size-5 text-white" /></span>
           <h2 className="text-lg font-semibold text-gray-900">Register New User (Admin only)</h2>
@@ -216,7 +258,7 @@ export default function AuthenticationPage() {
               value={form.username}
               onChange={(e) => setForm({ ...form, username: e.target.value })}
               required
-              className="mt-1 input"
+              className={`mt-1 ${fieldInputClass}`}
             />
           </div>
           <div>
@@ -226,7 +268,7 @@ export default function AuthenticationPage() {
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
               required
-              className="mt-1 input"
+              className={`mt-1 ${fieldInputClass}`}
             />
           </div>
           <div>
@@ -235,7 +277,7 @@ export default function AuthenticationPage() {
               value={form.full_name}
               onChange={(e) => setForm({ ...form, full_name: e.target.value })}
               required
-              className="mt-1 input"
+              className={`mt-1 ${fieldInputClass}`}
             />
           </div>
           <div>
@@ -246,7 +288,7 @@ export default function AuthenticationPage() {
                 value={form.password}
                 onChange={(e) => setForm({ ...form, password: e.target.value })}
                 required
-                className={`input pr-9 ${mismatch ? 'border-red-500 focus:outline-red-600' : ''}`}
+                className={`${fieldInputClass} pr-12 ${mismatch ? '!border-red-500 focus:!border-red-600 focus:!ring-red-200' : ''}`}
                 aria-invalid={mismatch}
               />
               <button type="button" onClick={() => setShowPwd((v) => !v)} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700">
@@ -262,7 +304,7 @@ export default function AuthenticationPage() {
                 value={retype}
                 onChange={(e) => setRetype(e.target.value)}
                 required
-                className={`input pr-9 ${mismatch ? 'border-red-500 focus:outline-red-600' : ''}`}
+                className={`${fieldInputClass} pr-12 ${mismatch ? '!border-red-500 focus:!border-red-600 focus:!ring-red-200' : ''}`}
                 aria-invalid={mismatch}
               />
               <button type="button" onClick={() => setShowRetype((v) => !v)} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700">
@@ -278,7 +320,7 @@ export default function AuthenticationPage() {
             <select
               value={form.role}
               onChange={(e) => setForm({ ...form, role: e.target.value })}
-              className="mt-1 select"
+              className={`mt-1 ${fieldSelectClass}`}
             >
               <option value="student">student</option>
               <option value="lecturer">lecturer</option>
@@ -289,16 +331,26 @@ export default function AuthenticationPage() {
           <div className="sm:col-span-2 flex items-center gap-3">
             <button
               type="submit"
-              className="btn-primary"
+              className={primaryButtonClass}
               disabled={regLoading || mismatch}
             >
               {regLoading ? "Registering..." : "Create user"}
             </button>
-            {regError && <span className="text-sm text-red-600">{regError}</span>}
-            {regSuccess && <span className="text-sm text-green-700">{regSuccess}</span>}
           </div>
         </form>
+        {regError && <div className={`${alertStyles.error} mt-3`}>{regError}</div>}
+        {regSuccess && <div className={`${alertStyles.success} mt-3`}>{regSuccess}</div>}
       </div>
+      {(meLoading || usersLoading || regLoading) && (
+        <div className={loadingToastClass}>
+          <span className="size-3 animate-spin rounded-full border-2 border-secondary/60 border-t-transparent" />
+          {meLoading
+            ? "Memuat profil..."
+            : usersLoading
+            ? "Memuat daftar pengguna..."
+            : "Mendaftarkan pengguna baru..."}
+        </div>
+      )}
     </div>
   );
 }

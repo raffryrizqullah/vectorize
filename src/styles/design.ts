@@ -32,3 +32,12 @@ export const toggleInputClass =
 
 export const mutedBadgeClass =
   "inline-flex items-center rounded-full bg-secondary/5 px-2 py-0.5 text-xs text-secondary/60";
+
+export const fieldBaseClass =
+  "rounded-2xl border border-secondary/15 bg-white/95 px-4 py-3 text-sm text-secondary placeholder:text-secondary/40 shadow-sm transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20";
+
+export const fieldInputClass = `${fieldBaseClass} w-full`;
+
+export const fieldSelectClass = `${fieldBaseClass} w-full appearance-none`;
+
+export const fieldTextareaClass = `${fieldBaseClass} w-full min-h-[140px] resize-y`;
