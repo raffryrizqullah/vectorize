@@ -90,8 +90,8 @@ export default function VectorizePage() {
       if (author) meta.author = author;
       if (department) meta.department = department;
       if (category) meta.kategori = category;
-      // Sensitivitas string, bukan boolean
-      meta["Sensitivitas"] = sensitivity;
+      // Sensitivity string metadata (use canonical English key expected by backend)
+      meta["sensitivity"] = sensitivity;
       // Timestamp otomatis dari client
       meta["client_upload_timestamp"] = new Date().toISOString();
 

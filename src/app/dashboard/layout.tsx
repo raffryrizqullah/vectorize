@@ -59,7 +59,7 @@ export default function DashboardLayout({
 
   const isActive = (href: string) => pathname === href;
 
-  // Guard: verify token and load user
+  // Guard: verify token and ensure admin role, then load user
   useEffect(() => {
     const token = getToken();
     if (!token) {
@@ -67,7 +67,15 @@ export default function DashboardLayout({
       return;
     }
     meRequest(token)
-      .then((u) => setUserName(u?.username || u?.full_name || null))
+      .then((u) => {
+        const role = u?.role || u?.user?.role;
+        if (role !== "admin") {
+          clearToken();
+          router.replace("/login");
+          return;
+        }
+        setUserName(u?.username || u?.full_name || u?.user?.username || u?.user?.full_name || null);
+      })
       .catch(() => {
         clearToken();
         router.replace("/login");

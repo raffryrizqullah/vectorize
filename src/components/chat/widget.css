@@ -23,7 +23,26 @@
 .cw .chatbot header { padding: 16px 0; position: relative; text-align: center; color: #fff; background: var(--color-primary, #0414d7);
   box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
 .cw .chatbot header h2 { font-size: 1.05rem; }
-.cw .chatbot header button { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); display: none; }
+.cw .chatbot header button { position: absolute; top: 50%; transform: translateY(-50%); display: none; }
+/* show header action buttons always */
+.cw .chatbot header button.action { display: block; right: 15px; }
+.cw .chatbot header button.login { left: 15px; right: auto; }
+
+/* login form in bubble */
+.cw .login-form label { display:block; font-size: 12px; color:#374151; margin-top:4px; }
+.cw .login-form input { width:100%; border:1px solid #e5e7eb; border-radius:8px; font-size:14px; padding:8px 10px; background:#fff; color:#111827; }
+.cw .login-form .row { display:grid; grid-template-columns: 1fr; gap:8px; }
+.cw .login-form button { background: var(--color-primary, #0414d7); color:#fff; border:none; border-radius:8px; padding:8px 12px; font-size:13px; cursor:pointer; }
+.cw .login-form .err { color:#b91c1c; font-size:12px; margin-top:6px; }
+
+/* Fullscreen login overlay inside widget */
+.cw .login-overlay { position:absolute; inset:0; background:#ffffff; display:flex; flex-direction:column; }
+.cw .login-overlay .topbar { display:flex; align-items:center; justify-content:space-between; padding:12px 14px; border-bottom:1px solid #e5e7eb; }
+.cw .login-overlay .topbar h3 { margin:0; font-size:14px; font-weight:600; color:#111827; }
+.cw .login-overlay .topbar button { background:transparent; border:none; cursor:pointer; color:#374151; }
+.cw .login-overlay .content { padding:14px; overflow:auto; }
+.cw .login-form .pwd-wrap { position:relative; }
+.cw .login-form .pwd-wrap button.eye { position:absolute; right:8px; top:50%; transform:translateY(-50%); background:transparent; border:none; color:#6b7280; cursor:pointer; }
 
 .cw .chatbox { overflow-y: auto; height: 510px; padding: 30px 20px 100px; }
 .cw .chatbox .chat { display: flex; list-style: none; }

@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { CubeTransparentIcon, EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import { loginRequest, TOKEN_STORAGE_KEY, getToken, meRequest } from "@/lib/api";
 import { getHealthSummary } from "@/lib/health";
+import Silk from "@/components/Silk";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -13,12 +14,17 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [showPwd, setShowPwd] = useState(false);
 
-  // If already authenticated, redirect to dashboard
+  // If already authenticated, redirect only if admin
   useEffect(() => {
     const token = getToken();
     if (!token) return;
     meRequest(token)
-      .then(() => router.replace("/dashboard"))
+      .then((u) => {
+        const role = u?.role || u?.user?.role;
+        if (role === "admin") {
+          router.replace("/dashboard");
+        }
+      })
       .catch(() => {/* ignore */});
   }, [router]);
 
@@ -33,6 +39,21 @@ export default function LoginPage() {
       // simpan token untuk sesi berikutnya
       if (typeof window !== "undefined") {
         localStorage.setItem(TOKEN_STORAGE_KEY, resp.access_token);
+      }
+      // Allow only admin role to proceed
+      try {
+        const me = await meRequest(resp.access_token);
+        const role = me?.role || me?.user?.role;
+        if (role !== "admin") {
+          if (typeof window !== "undefined") localStorage.removeItem(TOKEN_STORAGE_KEY);
+          setError("Hanya admin yang dapat mengakses dashboard.");
+          return;
+        }
+      } catch {
+        // If we cannot verify role, treat as failure
+        if (typeof window !== "undefined") localStorage.removeItem(TOKEN_STORAGE_KEY);
+        setError("Gagal memverifikasi peran pengguna.");
+        return;
       }
       setError(null);
       // Prefetch health summary sekali saat login berhasil
@@ -175,12 +196,8 @@ export default function LoginPage() {
             </div>
           </div>
         </div>
-        <div className="relative hidden lg:block lg:basis-1/2 lg:flex-1">
-          <img
-            alt=""
-            src="https://images.unsplash.com/photo-1626428091984-48f9ffbf927c?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=2133"
-            className="absolute inset-0 size-full object-cover"
-          />
+        <div className="relative hidden overflow-hidden bg-secondary/5 lg:block lg:basis-1/2 lg:flex-1">
+          <Silk speed={4} scale={1.2} noiseIntensity={1.1} color="#06337b" rotation={0.4} />
         </div>
       </div>
     </>
