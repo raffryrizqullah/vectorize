@@ -15,6 +15,17 @@ import {
   ShieldExclamationIcon,
   SparklesIcon,
 } from "@heroicons/react/24/outline";
+import {
+  cardSurfaceClass,
+  heroSectionClass,
+  heroTitleClass,
+  heroSubtitleClass,
+  primaryButtonClass,
+  secondaryButtonClass,
+  alertStyles,
+  loadingToastClass,
+  toggleInputClass,
+} from "@/styles/design";
 
 type PreferenceState = {
   theme: "system" | "light" | "dark";
@@ -28,9 +39,6 @@ type PreferenceState = {
   multiFactor: boolean;
   sessionTimeout: number;
 };
-
-const cardBase =
-  "relative flex flex-col rounded-3xl border border-gray-200 bg-white/95 p-6 shadow-sm backdrop-blur-sm transition hover:shadow-[0_18px_36px_rgba(6,51,123,0.12)]";
 
 const DEFAULT_PREFS: PreferenceState = {
   theme: "system",
@@ -141,14 +149,14 @@ export default function SettingsPage() {
 
   return (
     <div className="space-y-8">
-      <header className="rounded-3xl border border-primary/10 bg-primary/5 px-8 py-6 shadow-inner">
+      <header className={heroSectionClass}>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.35em] text-primary/80">Preferences</p>
-            <h1 className="mt-2 text-3xl font-semibold text-secondary sm:text-4xl dm-serif-text-regular-italic">
+            <h1 className={`${heroTitleClass} mt-2`}>
               Tailor Your Workspace
             </h1>
-            <p className="mt-3 max-w-xl text-sm text-secondary/70">
+            <p className={`${heroSubtitleClass} max-w-xl`}>
               Control the way Vectorize behaves for you. Update visual settings, alerts, and data management policies
               in one place.
             </p>
@@ -157,7 +165,7 @@ export default function SettingsPage() {
             <button
               type="button"
               onClick={() => setPrefs(DEFAULT_PREFS)}
-              className="inline-flex items-center gap-2 rounded-full border border-primary bg-white px-4 py-2 text-sm font-semibold text-primary transition hover:bg-primary/10"
+              className={secondaryButtonClass}
             >
               <SparklesIcon className="h-4 w-4" />
               Reset defaults
@@ -166,7 +174,7 @@ export default function SettingsPage() {
               type="button"
               onClick={savePreferences}
               disabled={saving}
-              className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+              className={primaryButtonClass}
             >
               {saving ? (
                 <>
@@ -184,19 +192,11 @@ export default function SettingsPage() {
         </div>
       </header>
 
-      {message && (
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-          {message}
-        </div>
-      )}
-      {error && (
-        <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          {error}
-        </div>
-      )}
+      {message && <div className={alertStyles.success}>{message}</div>}
+      {error && <div className={alertStyles.error}>{error}</div>}
 
       <section className="grid gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
-        <div className={`${cardBase}`}>
+        <div className={`${cardSurfaceClass}`}>
           <h2 className="text-lg font-semibold text-secondary">General</h2>
           <p className="mt-2 text-sm text-secondary/70">
             Configure how the dashboard looks and behaves on your devices.
@@ -277,7 +277,7 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        <div className={`${cardBase}`}>
+        <div className={`${cardSurfaceClass}`}>
           <h2 className="text-lg font-semibold text-secondary">Automations</h2>
           <p className="mt-2 text-sm text-secondary/70">
             Control ingestion and update routines across your knowledge base.
@@ -288,7 +288,7 @@ export default function SettingsPage() {
                 type="checkbox"
                 checked={prefs.autoIngest}
                 onChange={() => handleToggle("autoIngest")}
-                className="mt-1 size-4 rounded border-secondary/30 text-primary focus:ring-primary"
+                className={toggleInputClass}
               />
               <span className="text-sm text-secondary/80">
                 Automatically ingest files dropped into synced cloud folders.
@@ -299,7 +299,7 @@ export default function SettingsPage() {
                 type="checkbox"
                 checked={prefs.autoUpdates}
                 onChange={() => handleToggle("autoUpdates")}
-                className="mt-1 size-4 rounded border-secondary/30 text-primary focus:ring-primary"
+                className={toggleInputClass}
               />
               <span className="text-sm text-secondary/80">
                 Enable silent updates for the Vectorize CLI and ingestion agents.
@@ -319,7 +319,7 @@ export default function SettingsPage() {
       </section>
 
       <section className="grid gap-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
-        <div className={`${cardBase}`}>
+        <div className={`${cardSurfaceClass}`}>
           <h2 className="text-lg font-semibold text-secondary">Notifications</h2>
           <p className="mt-2 text-sm text-secondary/70">
             Decide how Vectorize keeps you in the loop about ingestion and outages.
@@ -330,7 +330,7 @@ export default function SettingsPage() {
                 type="checkbox"
                 checked={prefs.weeklyDigest}
                 onChange={() => handleToggle("weeklyDigest")}
-                className="mt-1 size-4 rounded border-secondary/30 text-primary focus:ring-primary"
+                className={toggleInputClass}
               />
               <span>
                 <span className="block text-sm font-semibold text-secondary">Weekly insights digest</span>
@@ -344,7 +344,7 @@ export default function SettingsPage() {
                 type="checkbox"
                 checked={prefs.healthAlerts}
                 onChange={() => handleToggle("healthAlerts")}
-                className="mt-1 size-4 rounded border-secondary/30 text-primary focus:ring-primary"
+                className={toggleInputClass}
               />
               <span>
                 <span className="block text-sm font-semibold text-secondary">Realtime health alerts</span>
@@ -358,7 +358,7 @@ export default function SettingsPage() {
                 type="checkbox"
                 checked={prefs.chatTranscripts}
                 onChange={() => handleToggle("chatTranscripts")}
-                className="mt-1 size-4 rounded border-secondary/30 text-primary focus:ring-primary"
+                className={toggleInputClass}
               />
               <span>
                 <span className="block text-sm font-semibold text-secondary">Assistant transcript recap</span>
@@ -370,7 +370,7 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        <div className={`${cardBase}`}>
+        <div className={`${cardSurfaceClass}`}>
           <h2 className="text-lg font-semibold text-secondary">Security controls</h2>
           <p className="mt-2 text-sm text-secondary/70">
             Fine tune MFA and alerting for your account. Organisation-wide policies apply automatically.
@@ -382,7 +382,7 @@ export default function SettingsPage() {
                 type="checkbox"
                 checked={prefs.multiFactor}
                 onChange={() => handleToggle("multiFactor")}
-                className="size-4 rounded border-secondary/30 text-primary focus:ring-primary"
+                className={`${toggleInputClass} mt-0`}
               />
             </label>
             <div className="rounded-2xl border border-secondary/10 bg-secondary/5 p-4 text-xs text-secondary/60">
@@ -409,7 +409,7 @@ export default function SettingsPage() {
         </div>
       </section>
 
-      <section className={`${cardBase}`}>
+      <section className={`${cardSurfaceClass}`}>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="text-lg font-semibold text-secondary">Data export</h2>
@@ -434,7 +434,7 @@ export default function SettingsPage() {
       </section>
 
       {loading && (
-        <div className="fixed inset-x-0 bottom-6 z-30 mx-auto flex w-max items-center gap-2 rounded-full border border-secondary/10 bg-background/95 px-4 py-2 text-xs text-secondary/60 shadow-lg">
+        <div className={loadingToastClass}>
           <span className="size-3 animate-spin rounded-full border-2 border-secondary/60 border-t-transparent" />
           Loading personal settings…
         </div>

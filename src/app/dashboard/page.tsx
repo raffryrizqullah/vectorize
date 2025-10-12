@@ -19,6 +19,15 @@ import {
   type ChatSessionInfo,
 } from "@/lib/api";
 import { getHealthSummary, type HealthResult } from "@/lib/health";
+import {
+  cardSurfaceClass,
+  heroSectionClass,
+  heroTitleClass,
+  heroSubtitleClass,
+  primaryButtonClass,
+  secondaryButtonClass,
+  alertStyles,
+} from "@/styles/design";
 
 type IconRenderer = (props: { className?: string }) => JSX.Element;
 
@@ -84,9 +93,6 @@ const HEALTH_CARD_DEFINITIONS = [
 ] as const;
 
 const DEFAULT_USAGE_SERIES = [56, 72, 81, 68, 94, 83, 109, 116, 132, 144, 131, 140];
-
-const cardBase =
-  "relative flex flex-col rounded-3xl border border-gray-200 bg-white/95 p-6 shadow-sm backdrop-blur-sm transition hover:-translate-y-0.5 hover:shadow-[0_18px_36px_rgba(6,51,123,0.12)]";
 
 function parseDate(value?: string | null): Date | null {
   if (!value) return null;
@@ -391,15 +397,15 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-background/95">
       <main className="flex flex-col gap-10 pb-16 pt-10">
-        <header className="rounded-3xl border border-primary/10 bg-primary/5 px-8 py-7 shadow-inner">
+        <header className={heroSectionClass}>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="space-y-4">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.4em] text-primary/80">Welcome back</p>
-                <h1 className="mt-3 text-3xl font-semibold text-secondary sm:text-4xl dm-serif-text-regular-italic">
+                <h1 className={heroTitleClass}>
                   Your Vectorized Knowledge Universe
                 </h1>
-                <p className="mt-3 max-w-2xl text-sm text-secondary/70 sm:text-base">
+                <p className={heroSubtitleClass}>
                   Keep an eye on ingestion, systems health, and engagement all inside a responsive, bento-inspired
                   workspace.
                 </p>
@@ -414,7 +420,7 @@ export default function DashboardPage() {
               <button
                 type="button"
                 onClick={loadDashboard}
-                className="flex items-center gap-2 rounded-full border border-primary bg-white px-4 py-2 text-sm font-semibold text-primary transition hover:bg-primary/10 disabled:cursor-not-allowed disabled:opacity-60"
+                className={secondaryButtonClass}
                 disabled={refreshing}
               >
                 {refreshing ? (
@@ -431,7 +437,7 @@ export default function DashboardPage() {
               </button>
               <Link
                 href="/dashboard/settings"
-                className="flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-primary/90"
+                className={primaryButtonClass}
               >
                 <Cog6ToothIcon className="h-4 w-4" />
                 Configure
@@ -440,16 +446,12 @@ export default function DashboardPage() {
           </div>
         </header>
 
-        {loadError && (
-          <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-            {loadError}
-          </div>
-        )}
+        {loadError && <div className={alertStyles.error}>{loadError}</div>}
 
         <section className="grid gap-6 xl:grid-cols-3">
           <div className="grid gap-6 xl:col-span-2 md:grid-cols-2">
             {statCards.map((stat) => (
-              <div key={stat.label} className={`${cardBase} overflow-hidden`}>
+              <div key={stat.label} className={`${cardSurfaceClass} overflow-hidden`}>
                 <div className="flex items-start justify-between">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.25em] text-secondary/60">{stat.label}</p>
@@ -476,7 +478,7 @@ export default function DashboardPage() {
               </div>
             ))}
           </div>
-          <div className={`${cardBase} xl:col-span-1`}>
+          <div className={`${cardSurfaceClass} xl:col-span-1`}>
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold text-secondary">Systems Health</h2>
               <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
@@ -501,7 +503,7 @@ export default function DashboardPage() {
         </section>
 
         <section className="grid gap-6 lg:grid-cols-[2fr,1fr]">
-          <div className={`${cardBase} min-h-[260px]`}>
+          <div className={`${cardSurfaceClass} min-h-[260px]`}>
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.3em] text-secondary/60">Usage Stats</p>
@@ -517,7 +519,7 @@ export default function DashboardPage() {
               <span>{usageSummary.deltaText}</span>
             </div>
           </div>
-          <div className={`${cardBase} space-y-4`}>
+          <div className={`${cardSurfaceClass} space-y-4`}>
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold text-secondary">Quick Actions</h2>
               <Squares2X2Icon className="h-5 w-5 text-primary/60" />
@@ -542,7 +544,7 @@ export default function DashboardPage() {
           </div>
         </section>
 
-        <section className={`${cardBase} overflow-hidden`}>
+        <section className={`${cardSurfaceClass} overflow-hidden`}>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <h2 className="text-lg font-semibold text-secondary">Recent Activities</h2>
             <Link

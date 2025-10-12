@@ -18,6 +18,17 @@ import {
   MapPinIcon,
   PhoneIcon,
 } from "@heroicons/react/24/outline";
+import {
+  cardSurfaceClass,
+  heroSectionClass,
+  heroTitleClass,
+  heroSubtitleClass,
+  primaryButtonClass,
+  secondaryButtonClass,
+  alertStyles,
+  loadingToastClass,
+  mutedBadgeClass,
+} from "@/styles/design";
 
 type NormalizedUser = {
   username: string;
@@ -30,9 +41,6 @@ type NormalizedUser = {
 };
 
 type ProfileState = "idle" | "loading" | "error" | "ready";
-
-const cardBase =
-  "relative flex flex-col rounded-3xl border border-gray-200 bg-white/95 p-6 shadow-sm backdrop-blur-sm transition hover:shadow-[0_18px_36px_rgba(6,51,123,0.12)]";
 
 export default function ProfilePage() {
   const [state, setState] = useState<ProfileState>("idle");
@@ -172,7 +180,7 @@ export default function ProfilePage() {
   return (
     <div className="space-y-8">
       <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-        <section className="rounded-3xl border border-primary/10 bg-primary/5 px-8 py-6 shadow-inner">
+        <section className={`${heroSectionClass} py-6`}>
           <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
             <div className="flex items-start gap-4">
               <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary text-white shadow-lg">
@@ -180,7 +188,7 @@ export default function ProfilePage() {
               </div>
               <div className="space-y-2">
                 <div>
-                  <h1 className="text-2xl font-semibold text-secondary">
+                  <h1 className={heroTitleClass}>
                     {user?.fullName || "Loading profile…"}
                   </h1>
                   <p className="text-sm text-secondary/70">
@@ -202,14 +210,14 @@ export default function ProfilePage() {
             <div className="flex flex-col gap-3 sm:flex-row">
               <button
                 type="button"
-                className="inline-flex items-center justify-center gap-2 rounded-full border border-primary bg-white px-5 py-2 text-sm font-semibold text-primary transition hover:bg-primary/10"
+                className={`${secondaryButtonClass} justify-center px-5`}
               >
                 <ShieldCheckIcon className="h-4 w-4" />
                 Manage security
               </button>
               <button
                 type="button"
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-primary/90"
+                className={`${primaryButtonClass} justify-center px-5`}
               >
                 <AcademicCapIcon className="h-4 w-4" />
                 Edit profile
@@ -218,7 +226,7 @@ export default function ProfilePage() {
           </div>
         </section>
 
-        <section className={`${cardBase} min-h-[220px]`}>
+        <section className={`${cardSurfaceClass} min-h-[220px]`}>
           <h2 className="text-lg font-semibold text-secondary">Contribution Overview</h2>
           <div className="mt-6 grid grid-cols-1 gap-4">
             <div className="rounded-2xl bg-secondary/5 p-4">
@@ -247,14 +255,10 @@ export default function ProfilePage() {
         </section>
       </div>
 
-      {error && (
-        <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          {error}
-        </div>
-      )}
+      {error && <div className={alertStyles.error}>{error}</div>}
 
       <section className="grid gap-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
-        <div className={`${cardBase}`}>
+        <div className={`${cardSurfaceClass}`}>
           <h3 className="text-lg font-semibold text-secondary">Contact & Access</h3>
           <div className="mt-6 grid gap-4 sm:grid-cols-2">
             <div className="rounded-2xl bg-secondary/5 p-4">
@@ -275,14 +279,26 @@ export default function ProfilePage() {
               <p className="text-xs uppercase tracking-[0.2em] text-secondary/50">Location</p>
               <div className="mt-2 flex items-center gap-2 text-sm text-secondary">
                 <MapPinIcon className="h-4 w-4 text-primary" />
-                <span>{user?.metadata?.location ?? "Not provided"}</span>
+                <span>
+                  {user?.metadata?.location ? (
+                    user.metadata.location
+                  ) : (
+                    <span className={mutedBadgeClass}>Belum diisi</span>
+                  )}
+                </span>
               </div>
             </div>
             <div className="rounded-2xl bg-secondary/5 p-4">
               <p className="text-xs uppercase tracking-[0.2em] text-secondary/50">Direct Contact</p>
               <div className="mt-2 flex items-center gap-2 text-sm text-secondary">
                 <PhoneIcon className="h-4 w-4 text-primary" />
-                <span>{user?.metadata?.phone ?? "Not provided"}</span>
+                <span>
+                  {user?.metadata?.phone ? (
+                    user.metadata.phone
+                  ) : (
+                    <span className={mutedBadgeClass}>Belum diisi</span>
+                  )}
+                </span>
               </div>
             </div>
           </div>
@@ -311,7 +327,7 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        <div className={`${cardBase}`}>
+        <div className={`${cardSurfaceClass}`}>
           <h3 className="text-lg font-semibold text-secondary">Activity Timeline</h3>
           <ul className="mt-6 space-y-4">
             {!timelineItems.length && (
@@ -335,11 +351,11 @@ export default function ProfilePage() {
         </div>
       </section>
 
-      <section className={`${cardBase}`}>
+      <section className={`${cardSurfaceClass}`}>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h3 className="text-lg font-semibold text-secondary">Security snapshot</h3>
-            <p className="text-sm text-secondary/70">
+            <p className={heroSubtitleClass}>
               Review MFA, tokens, and policy compliance for this account.
             </p>
           </div>
@@ -374,14 +390,22 @@ export default function ProfilePage() {
           <div className="rounded-2xl bg-secondary/5 p-4">
             <p className="text-xs uppercase tracking-[0.2em] text-secondary/50">Last password update</p>
             <p className="mt-2 text-sm font-semibold text-secondary">
-              {user?.metadata?.password_changed_at
-                ? new Date(user.metadata.password_changed_at).toLocaleDateString()
-                : "Unknown"}
+              {user?.metadata?.password_changed_at ? (
+                new Date(user.metadata.password_changed_at).toLocaleDateString()
+              ) : (
+                <span className={mutedBadgeClass}>Belum diketahui</span>
+              )}
             </p>
             <p className="mt-1 text-xs text-secondary/60">Ensure password is rotated every 90 days.</p>
           </div>
         </div>
       </section>
+      {state === "loading" && (
+        <div className={loadingToastClass}>
+          <span className="size-3 animate-spin rounded-full border-2 border-secondary/60 border-t-transparent" />
+          Memuat data profil…
+        </div>
+      )}
     </div>
   );
 }
