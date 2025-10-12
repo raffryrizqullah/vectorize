@@ -311,56 +311,6 @@ export default function HealthCheckPage() {
           particleCount={10}
         />
       </div>
-
-      {/* Summary row to avoid empty space and give quick glance */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
-        {(() => {
-          const vals = Object.values(results);
-          const healthy = vals.filter((v) => v?.ok).length;
-          const down = vals.filter((v) => v && !v.ok && v.status !== "unknown").length;
-          const config = vals.filter((v) => /config|credential|permission|key/i.test(v?.error || "")).length;
-          const items = [
-            { label: "Healthy", value: healthy, icon: ServerIcon },
-            { label: "Down", value: down, icon: BoltIcon },
-            { label: "Config", value: config, icon: CpuChipIcon },
-          ];
-          const donut = { healthy, unhealthy: down, config };
-          return [
-            ...items.map((it) => (
-              <div key={it.label} className="relative overflow-hidden rounded-lg bg-background px-4 pt-5 pb-4 shadow-xs border border-gray-200 sm:px-6 sm:pt-6">
-                <dt>
-                  <div className="absolute rounded-md bg-primary p-3">
-                    <it.icon aria-hidden className="size-6 text-white" />
-                  </div>
-                  <p className="ml-16 truncate text-sm font-medium text-gray-500">{it.label}</p>
-                </dt>
-                <dd className="ml-16">
-                  <p className="text-2xl font-semibold text-gray-900">{it.value}</p>
-                  {lastRefresh && (
-                    <div className="mt-1 text-xs text-gray-600">Last refresh: <span className="font-mono">{lastRefresh}</span></div>
-                  )}
-                </dd>
-              </div>
-            )),
-            <div key="donut" className="relative overflow-hidden rounded-lg bg-background px-4 pt-5 pb-4 shadow-xs border border-gray-200 sm:px-6 sm:pt-6">
-              <dt>
-                <div className="absolute rounded-md bg-primary p-3">
-                  <CloudIcon aria-hidden className="size-6 text-white" />
-                </div>
-                <p className="ml-16 truncate text-sm font-medium text-gray-500">Last 24h status</p>
-              </dt>
-              <dd className="ml-16 flex items-center gap-4">
-                <Donut {...donut} />
-                <div className="text-xs text-gray-600 space-y-1">
-                  <div><span className="inline-block size-2 rounded-full bg-green-500 mr-2" />Healthy</div>
-                  <div><span className="inline-block size-2 rounded-full bg-red-500 mr-2" />Down</div>
-                  <div><span className="inline-block size-2 rounded-full bg-amber-500 mr-2" />Config</div>
-                </div>
-              </dd>
-            </div>
-          ];
-        })()}
-      </div>
     </div>
   );
 }

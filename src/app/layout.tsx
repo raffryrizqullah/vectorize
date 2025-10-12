@@ -31,6 +31,10 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=DM+Serif+Text:ital@0;1&display=swap"
           rel="stylesheet"
         />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght,slnt,wdth@8..144,400..700,-10..0,90..110&display=swap"
+          rel="stylesheet"
+        />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased h-full`}
