@@ -176,7 +176,7 @@ export default function AuthenticationPage() {
                 checked={activeOnly}
                 onChange={(e) => setActiveOnly(e.target.checked)}
               />
-              Active only
+              Active
             </label>
             <input
               type="number"
