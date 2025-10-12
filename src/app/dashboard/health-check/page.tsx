@@ -14,7 +14,8 @@ import {
 } from "@/lib/health";
 import { ServerIcon, BoltIcon, CircleStackIcon, CloudIcon, CubeIcon, CpuChipIcon } from "@heroicons/react/24/outline";
 import dynamic from "next/dynamic";
-const HealthLineChart = dynamic(() => import("@/components/HealthLineChart"), { ssr: false });
+const MagicBento = dynamic(() => import("@/components/MagicBento"), { ssr: false });
+const CountUp = dynamic(() => import("@/components/CountUp"), { ssr: false });
 
 type CardKey = "api" | "pinecone" | "openai" | "redis" | "database" | "storage";
 type Card = { key: CardKey; title: string; fetcher: () => Promise<HealthResult>; icon: (props: any) => JSX.Element };
@@ -31,28 +32,6 @@ const CARDS: Card[] = [
 function StatusDot({ state }: { state: "ok" | "down" | "unknown" }) {
   const color = state === "ok" ? "bg-green-500" : state === "down" ? "bg-red-500" : "bg-gray-400";
   return <span className={`inline-block size-2 rounded-full ${color}`} aria-hidden />;
-}
-
-// Tiny inline sparkline using SVG
-function Sparkline({ points, height = 24, stroke = "#0414d7" }: { points: number[]; height?: number; stroke?: string }) {
-  if (!points || points.length === 0) return null;
-  const w = Math.max(60, points.length * 10);
-  const max = Math.max(...points);
-  const min = Math.min(...points);
-  const range = Math.max(1, max - min);
-  const stepX = w / (points.length - 1 || 1);
-  const d = points
-    .map((v, i) => {
-      const x = i * stepX;
-      const y = height - ((v - min) / range) * height;
-      return `${i === 0 ? "M" : "L"}${x},${y}`;
-    })
-    .join(" ");
-  return (
-    <svg width={w} height={height} viewBox={`0 0 ${w} ${height}`} className="text-primary">
-      <path d={d} fill="none" stroke={stroke} strokeWidth={2} />
-    </svg>
-  );
 }
 
 // Minimal donut chart for last 24h distribution
@@ -186,6 +165,112 @@ export default function HealthCheckPage() {
     Object.values(results).some((r) => r && (r.status === "down" || r.ok === false)),
   [results]);
 
+  const latencyStats = useMemo(() => {
+    const stats: Record<
+      CardKey,
+      { latest: number | null; average: number | null; min: number | null; max: number | null }
+    > = {} as any;
+    CARDS.forEach((c) => {
+      const series = latency[c.key] ?? [];
+      if (!series.length) {
+        stats[c.key] = { latest: null, average: null, min: null, max: null };
+        return;
+      }
+      const sum = series.reduce((acc, val) => acc + val, 0);
+      stats[c.key] = {
+        latest: series[series.length - 1] ?? null,
+        average: Math.round(sum / series.length),
+        min: Math.min(...series),
+        max: Math.max(...series),
+      };
+    });
+    return stats;
+  }, [latency]);
+
+  const cardsData = useMemo(() => {
+    return CARDS.map((c) => {
+      const r = results[c.key];
+      const stat = latencyStats[c.key];
+      const statusLabel = r ? (r.ok ? "Healthy" : r.status ?? "Unknown") : "Pending";
+      const descriptionParts: string[] = [];
+      if (r?.version) descriptionParts.push(`Version ${r.version}`);
+      if (stat?.latest != null) descriptionParts.push(`Latency ${stat.latest}ms`);
+      if (r?.timestamp) descriptionParts.push(new Date(r.timestamp).toLocaleTimeString());
+      if (r?.error) descriptionParts.push(r.error);
+      const description = descriptionParts.join(" | ") || "Awaiting recent health data.";
+      const timestampText = r?.timestamp
+        ? `Updated ${new Date(r.timestamp).toLocaleTimeString()}`
+        : "Awaiting sample";
+      const footerMeta = [statusLabel, r?.version ? `Version ${r.version}` : null].filter(Boolean).join(" | ");
+
+      const body = (
+        <div className="flex h-full flex-col gap-4 text-secondary">
+          <div className="flex flex-col gap-1">
+            <h3 className="text-xl font-semibold text-primary">{c.title}</h3>
+            <p className="text-xs uppercase tracking-[0.2em] text-secondary/50">{timestampText}</p>
+          </div>
+          {stat?.latest != null ? (
+            <div className="flex items-end gap-2 text-primary">
+              <CountUp
+                to={stat.latest}
+                from={Math.max(0, stat.latest - 50)}
+                duration={0.8}
+                className="text-3xl font-bold tracking-tight"
+              />
+              <span className="pb-1 text-sm font-semibold text-secondary">ms</span>
+            </div>
+          ) : (
+            <span className="text-sm font-medium text-secondary">No latency data</span>
+          )}
+          <div className="grid grid-cols-3 gap-3 text-[11px] text-secondary/70">
+            <div>
+              <div className="font-semibold text-secondary">Avg</div>
+              {stat?.average != null ? (
+                <div className="flex items-end gap-1">
+                  <CountUp to={stat.average} duration={0.9} className="font-medium text-secondary" />
+                  <span className="text-[10px] uppercase text-secondary/50">ms</span>
+                </div>
+              ) : (
+                <span>--</span>
+              )}
+            </div>
+            <div>
+              <div className="font-semibold text-secondary">Min</div>
+              {stat?.min != null ? (
+                <div className="flex items-end gap-1">
+                  <CountUp to={stat.min} duration={0.7} className="font-medium text-secondary" />
+                  <span className="text-[10px] uppercase text-secondary/50">ms</span>
+                </div>
+              ) : (
+                <span>--</span>
+              )}
+            </div>
+            <div>
+              <div className="font-semibold text-secondary">Max</div>
+              {stat?.max != null ? (
+                <div className="flex items-end gap-1">
+                  <CountUp to={stat.max} duration={1.05} className="font-medium text-secondary" />
+                  <span className="text-[10px] uppercase text-secondary/50">ms</span>
+                </div>
+              ) : (
+                <span>--</span>
+              )}
+            </div>
+          </div>
+          <div className="mt-auto text-[11px] text-secondary/60">{footerMeta || statusLabel}</div>
+        </div>
+      );
+
+      return {
+        color: "#ffffff",
+        title: c.title,
+        description,
+        label: statusLabel,
+        body,
+      };
+    });
+  }, [results, latencyStats]);
+
   return (
     <div className="space-y-4">
       {anyDown && (
@@ -216,55 +301,16 @@ export default function HealthCheckPage() {
           </div>
         </div>
 
-      <dl className="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        {CARDS.map((c) => {
-          const r = results[c.key];
-          const state: "ok" | "down" | "unknown" = r ? (r.ok ? "ok" : (r.status === "unknown" ? "unknown" : "down")) : "unknown";
-          return (
-            <div key={c.key} className="relative overflow-hidden rounded-lg bg-background px-4 pt-5 pb-12 shadow-xs border border-gray-200 sm:px-6 sm:pt-6">
-              <dt>
-                <div className="absolute rounded-md bg-primary p-3">
-                  <c.icon aria-hidden className="size-6 text-white" />
-                </div>
-                <p className="ml-16 truncate text-sm font-medium text-gray-500">{c.title}</p>
-              </dt>
-              <dd className="ml-16 pb-6 sm:pb-7">
-                <div className="flex items-center gap-2">
-                  <StatusDot state={state} />
-                  <p className="text-base font-semibold text-gray-900">{r?.status ?? "unknown"}</p>
-                  {r?.version && <span className="text-xs text-gray-500">{r.version}</span>}
-                  {c.key === "pinecone" && r?.raw?.index_exists !== undefined && (
-                    <span className={`ml-2 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${r.raw.index_exists ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
-                      {r.raw.index_exists ? "index_exists" : "index_missing"}
-                    </span>
-                  )}
-                  {c.key === "storage" && r?.raw?.bucket_accessible !== undefined && (
-                    <span className={`ml-2 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${r.raw.bucket_accessible ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
-                      {r.raw.bucket_accessible ? "bucket accessible" : "bucket error"}
-                    </span>
-                  )}
-                </div>
-                <div className="mt-2 text-xs text-gray-600">
-                  {r?.timestamp && (
-                    <div>Timestamp: <span className="font-mono">{r.timestamp}</span></div>
-                  )}
-                  {r?.error && <div className="text-red-600">{r.error}</div>}
-                </div>
-                {Array.isArray(latency[c.key]) && latency[c.key].length > 0 && (
-                  <div className="mt-2">
-                    <HealthLineChart points={latency[c.key]} height={28} />
-                    <div className="mt-1 text-[10px] text-gray-500">latency last {latency[c.key].length} checks (ms)</div>
-                  </div>
-                )}
-
-                <div className="absolute inset-x-0 bottom-0 bg-gray-50/60 px-4 py-3 sm:px-6">
-                  <div className="text-xs text-gray-600">Last checked just now</div>
-                </div>
-              </dd>
-            </div>
-          );
-        })}
-      </dl>
+      <div className="mt-6">
+        <MagicBento
+          cards={cardsData}
+          glowColor="6, 51, 123"
+          textAutoHide
+          enableTilt
+          enableMagnetism
+          particleCount={10}
+        />
+      </div>
 
       {/* Summary row to avoid empty space and give quick glance */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
