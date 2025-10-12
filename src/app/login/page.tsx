@@ -83,14 +83,14 @@ export default function LoginPage() {
       <div className="flex min-h-screen flex-1">
         <div className="relative hidden flex-1 overflow-hidden bg-secondary/5 lg:flex lg:basis-1/2">
           <Silk speed={4.2} scale={1.25} noiseIntensity={1} color="#06337b" rotation={0.35} />
-          <div className="absolute inset-x-12 bottom-16 max-w-sm text-white">
-            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-white/60">A Wise Quote</p>
-            <div className="mt-6 h-px w-16 bg-white/40" />
-            <h2 className="mt-8 text-4xl font-serif leading-tight text-white">
-              Get Everything <br /> You Want
+          <div className="absolute inset-x-12 bottom-16 max-w-xl text-white">
+            <div className="mt-6 h-px w-60 bg-white/40" />
+            <h2 className="mt-8 text-6xl leading-tight text-white dm-serif-text-regular-italic">
+              <span className="block whitespace-nowrap">Get Your Knowledge Base</span>
+              <span className="block whitespace-nowrap">Vectorized</span>
             </h2>
-            <p className="mt-5 text-sm text-white/80">
-              You can get everything you want if you work hard, trust the process, and stick to the plan.
+            <p className="mt-5 text-sm text-white/80 dm-serif-text-regular">
+              You can unlock the true potential of your knowledge when you organize, vectorize, and let intelligence do the rest.
             </p>
           </div>
         </div>

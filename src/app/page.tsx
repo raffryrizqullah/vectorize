@@ -35,11 +35,11 @@ export default function Home() {
         />
         <div className="mx-auto flex max-w-3xl flex-col items-center px-6 py-32 text-center sm:py-40 lg:px-8">
           <CubeTransparentIcon aria-hidden="true" className="h-14 w-14 text-primary drop-shadow-lg" />
-          <h1 className="mt-8 text-5xl font-semibold tracking-tight text-balance text-secondary sm:text-7xl">
-            Untuk Masa Depan Emas. <br /> Take this.
+          <h1 className="mt-8 text-5xl font-semibold tracking-tight text-balance text-secondary sm:text-7xl dm-serif-text-regular">
+            Empower Your Ideas with  <br /> Intelligent Knowledge
           </h1>
           <p className="mt-6 text-lg font-medium text-pretty text-secondary sm:text-xl/8">
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Libero dolores nisi, quae omnis molestias tempora rerum dolor beatae laborum adipisci dicta tenetur similique exercitationem eum distinctio quidem fugiat explicabo quasi?
+            Connect, refine, and evolve the way your team learns and makes decisions — seamlessly and intelligently.
           </p>
           <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
             <Link
