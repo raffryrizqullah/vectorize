@@ -111,10 +111,10 @@ export default function ChatWidget() {
       const resp = await loginRequest(username, password);
       if (typeof window !== "undefined") localStorage.setItem(CHAT_TOKEN_KEY, resp.access_token);
       setShowLogin(false);
-      setMessages((m) => [...m, { role: "ai", text: "Login berhasil. Silakan lanjutkan percakapan." }]);
+      setMessages((m) => [...m, { role: "ai", text: "Login successful. Please continue the conversation." }]);
       setTimeout(scrollBottom, 0);
     } catch (err: any) {
-      setLoginErr(err?.message || "Login gagal");
+      setLoginErr(err?.message || "Login failed.");
     }
   }
 

@@ -25,14 +25,14 @@ export default function ApiKeyPage() {
 
   async function refresh() {
     const token = getToken();
-    if (!token) { setError("Tidak ada token"); return; }
+    if (!token) { setError("Missing token."); return; }
     setLoading(true);
     setError(null);
     try {
       const data = await listApiKeys(token);
       setItems(data);
     } catch (e: any) {
-      setError(e?.message || "Gagal memuat API keys");
+      setError(e?.message || "Failed to load API keys.");
     } finally {
       setLoading(false);
     }
@@ -45,8 +45,8 @@ export default function ApiKeyPage() {
     setCreateError(null);
     setCreatedKey(null);
     const token = getToken();
-    if (!token) { setCreateError("Tidak ada token"); return; }
-    if (!userId || !name) { setCreateError("User ID dan Name wajib diisi."); return; }
+    if (!token) { setCreateError("Missing token."); return; }
+    if (!userId || !name) { setCreateError("User ID and Name are required."); return; }
     setCreating(true);
     try {
       const res = await createApiKey(token, { user_id: userId, name });
@@ -54,7 +54,7 @@ export default function ApiKeyPage() {
       setName("");
       await refresh();
     } catch (e: any) {
-      setCreateError(e?.message || "Gagal membuat API key");
+      setCreateError(e?.message || "Failed to create API key.");
     } finally {
       setCreating(false);
     }
@@ -82,13 +82,13 @@ export default function ApiKeyPage() {
 
   async function onRevoke(id: string) {
     const token = getToken();
-    if (!token) { setError("Tidak ada token"); return; }
-    if (!confirm("Revoke API key ini?")) return;
+    if (!token) { setError("Missing token."); return; }
+    if (!confirm("Revoke this API key?")) return;
     try {
       await revokeApiKey(token, id);
       await refresh();
     } catch (e: any) {
-      alert(e?.message || "Gagal revoke");
+      alert(e?.message || "Failed to revoke API key.");
     }
   }
 
@@ -107,7 +107,7 @@ export default function ApiKeyPage() {
               value={userId}
               onChange={(e) => setUserId(e.target.value)}
               className={fieldInputClass}
-              placeholder="UUID user"
+              placeholder="User UUID"
               required
             />
           </div>
@@ -117,7 +117,7 @@ export default function ApiKeyPage() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               className={fieldInputClass}
-              placeholder="Nama penggunaan key"
+              placeholder="Key usage name"
               required
             />
           </div>
@@ -177,7 +177,7 @@ export default function ApiKeyPage() {
             </thead>
             <tbody className="divide-y divide-gray-200 bg-white">
               {items.length === 0 && (
-                <tr><td colSpan={7} className="px-4 py-6 text-center text-sm text-gray-500">Tidak ada data.</td></tr>
+                <tr><td colSpan={7} className="px-4 py-6 text-center text-sm text-gray-500">No data.</td></tr>
               )}
               {items.map((k) => {
                 const format = (s?: string | null) => {
@@ -216,7 +216,7 @@ export default function ApiKeyPage() {
       {(loading || creating) && (
         <div className={loadingToastClass}>
           <span className="size-3 animate-spin rounded-full border-2 border-secondary/60 border-t-transparent" />
-          {loading ? "Memuat daftar API key..." : "Membuat API key..."}
+          {loading ? "Loading API keys..." : "Creating API key..."}
         </div>
       )}
     </div>

@@ -41,12 +41,12 @@ export default function VectorizePage() {
     setListError(null);
     setFetchingList(true);
     const token = getToken();
-    if (!token) { setListError("Tidak ada token"); setFetchingList(false); return; }
+    if (!token) { setListError("Missing token."); setFetchingList(false); return; }
     try {
       const data = await listDocuments(token, { filter: filter || undefined, limit: 2000 });
       setDocs(data?.documents || []);
     } catch (err: any) {
-      setListError(err?.message || "Gagal memuat daftar dokumen");
+      setListError(err?.message || "Failed to load document list.");
     } finally {
       setFetchingList(false);
     }
@@ -80,12 +80,12 @@ export default function VectorizePage() {
     setError(null);
     setSuccessMsg(null);
     if (files.length === 0) {
-      setError("Pilih minimal satu file PDF terlebih dahulu.");
+      setError("Select at least one PDF file first.");
       return;
     }
     const token = getToken();
     if (!token) {
-      setError("Tidak ada token. Silakan login ulang.");
+      setError("Missing token. Please log in again.");
       return;
     }
 
@@ -100,7 +100,7 @@ export default function VectorizePage() {
       if (category) meta.kategori = category;
       // Sensitivity string metadata (use canonical English key expected by backend)
       meta["sensitivity"] = sensitivity;
-      // Timestamp otomatis dari client
+      // Automatically add a client-side timestamp
       meta["client_upload_timestamp"] = new Date().toISOString();
 
       const cleanLinks = sourceLinks.map((s) => s.trim());
@@ -124,9 +124,9 @@ export default function VectorizePage() {
 
       const totalChunks = results.reduce((sum: number, r: any) => sum + (r?.metadata?.total_chunks || 0), 0);
       const okCount = results.filter((r: any) => (r?.status || "").toLowerCase() === "completed").length;
-      setSuccessMsg(`Upload berhasil: ${okCount}/${files.length} dokumen. Total chunks: ${totalChunks}.`);
+      setSuccessMsg(`Upload successful: ${okCount}/${files.length} document${files.length === 1 ? "" : "s"}. Total chunks: ${totalChunks}.`);
     } catch (err: any) {
-      setError(err?.message || "Upload gagal");
+      setError(err?.message || "Upload failed.");
       setFiles((prev) => prev.map((f) => ({ ...f, status: f.status === "uploading" ? "failed" : f.status })));
     } finally {
       setLoading(false);
@@ -146,7 +146,7 @@ export default function VectorizePage() {
         <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/60 backdrop-blur-sm">
           <div className="flex flex-col items-center gap-2">
             <div className="size-10 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-            <div className="text-sm text-gray-700">Mengunggah & memproses dokumen...</div>
+            <div className="text-sm text-gray-700">Uploading & processing documents...</div>
           </div>
         </div>
       )}
@@ -154,9 +154,9 @@ export default function VectorizePage() {
       <div className={cardSurfaceClass}>
         <div className="flex items-center gap-2">
           <span className="rounded-md bg-primary p-2"><CloudArrowUpIcon className="size-5 text-white" /></span>
-          <h2 className="text-lg font-semibold text-gray-900">Upload Dokumen (PDF)</h2>
+          <h2 className="text-lg font-semibold text-gray-900">Upload Documents (PDF)</h2>
         </div>
-        <p className="mt-1 text-sm text-gray-600">Unggah satu atau beberapa PDF untuk diproses dan diindeks.</p>
+        <p className="mt-1 text-sm text-gray-600">Upload one or more PDFs to process and index.</p>
 
         {/* Drag and drop */}
         <div
@@ -167,19 +167,19 @@ export default function VectorizePage() {
           <div className="text-center">
             <div className="mt-4 flex text-sm leading-6 text-gray-600">
               <label className="relative cursor-pointer rounded-md bg-white font-semibold text-primary focus-within:outline-none focus-within:ring-2 focus-within:ring-primary-600 focus-within:ring-offset-2 hover:opacity-90">
-                <span>Pilih file</span>
+                <span>Choose files</span>
                 <input type="file" multiple accept="application/pdf" className="sr-only" onChange={(e) => onChooseFiles(e.target.files)} disabled={loading} />
               </label>
-              <p className="pl-1">atau drag dan drop</p>
+              <p className="pl-1">or drag and drop</p>
             </div>
-            <p className="text-xs leading-5 text-gray-600">PDF saja, ukuran wajar sesuai server</p>
+            <p className="text-xs leading-5 text-gray-600">PDF only, reasonably sized for the server.</p>
           </div>
         </div>
 
         {/* Source links dynamic + metadata */}
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <div>
-            <label className="field-label">Source links (opsional)</label>
+            <label className="field-label">Source links (optional)</label>
             <div className="mt-1 space-y-2">
               {files.map((f, i) => (
                 <input
@@ -191,16 +191,16 @@ export default function VectorizePage() {
                     next[i] = e.target.value;
                     return next;
                   })}
-                  placeholder={`Link untuk: ${f.file.name}`}
+                  placeholder={`Link for: ${f.file.name}`}
                   className="input"
                   disabled={loading}
                 />
               ))}
               {files.length === 0 && (
-                <p className="hint">Tambahkan file untuk memunculkan input source link per-file.</p>
+                <p className="hint">Add files to show per-file source link inputs.</p>
               )}
             </div>
-            <p className="hint">Jumlah field otomatis mengikuti jumlah file.</p>
+            <p className="hint">Field count automatically matches the number of files.</p>
           </div>
           <div className="space-y-3">
             <div className="grid grid-cols-2 gap-3">
@@ -209,7 +209,7 @@ export default function VectorizePage() {
                 <input
                   value={author}
                   onChange={(e) => setAuthor(e.target.value)}
-                  placeholder="Nama penulis"
+                  placeholder="Author name"
                   className="input"
                   disabled={loading}
                 />
@@ -221,13 +221,13 @@ export default function VectorizePage() {
                 <input
                   value={department}
                   onChange={(e) => setDepartment(e.target.value)}
-                  placeholder="Unit/Bidang"
+                  placeholder="Unit/Division"
                   className="input"
                   disabled={loading}
                 />
               </div>
               <div>
-                <label className="field-label">Sensitivitas</label>
+                <label className="field-label">Sensitivity</label>
                 <div className="mt-1 inline-flex rounded-md border border-gray-300 bg-white p-0.5">
                   {(["public","internal"] as const).map((opt) => (
                     <button
@@ -244,19 +244,19 @@ export default function VectorizePage() {
               </div>
             </div>
             <div>
-              <label className="field-label">Kategori</label>
+              <label className="field-label">Category</label>
               <div className="mt-1 grid grid-cols-1 gap-2 text-sm text-gray-700 sm:grid-cols-2">
                 {[
-                  "Dokumentasi Sistem & Layanan",
-                  "Prosedur & Kebijakan IT",
-                  "Keamanan & Jaringan",
-                  "Pelatihan & Tutorial",
-                  "Laporan & Audit",
+                  "System & Service Documentation",
+                  "IT Procedures & Policies",
+                  "Security & Networking",
+                  "Training & Tutorials",
+                  "Reports & Audits",
                 ].map((label) => (
                   <label key={label} className="flex items-center gap-2">
                     <input
                       type="radio"
-                      name="kategori"
+                      name="category"
                       checked={category === label}
                       onChange={() => !loading && setCategory(label)}
                       className="size-4"
@@ -279,7 +279,9 @@ export default function VectorizePage() {
           >
             {loading ? "Uploading..." : "Upload"}
           </button>
-          <span className="text-xs text-gray-500">{files.length} file dipilih</span>
+          <span className="text-xs text-gray-500">
+            {files.length === 1 ? "1 file selected" : `${files.length} files selected`}
+          </span>
         </div>
 
         {error && <div className={`${alertStyles.error} mt-3`}>{error}</div>}
@@ -289,7 +291,7 @@ export default function VectorizePage() {
       {/* List files */}
       {files.length > 0 && (
         <div className={cardSurfaceClass}>
-          <h3 className="text-base font-semibold text-gray-900">Daftar File</h3>
+          <h3 className="text-base font-semibold text-gray-900">File List</h3>
           <ul className="mt-3 divide-y divide-gray-200">
             {files.map((f, idx) => (
               <li key={`${f.file.name}-${idx}`} className="flex items-center justify-between py-3">
@@ -317,7 +319,7 @@ export default function VectorizePage() {
                       className="text-xs text-red-600 hover:underline"
                       onClick={() => setFiles(prev => prev.filter((_, i) => i !== idx))}
                     >
-                      Hapus
+                      Remove
                     </button>
                   )}
                 </div>
@@ -338,7 +340,7 @@ export default function VectorizePage() {
             <input
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
-              placeholder='filter (URL-encoded JSON), contoh: {"content_type":{"$eq":"text"}}'
+              placeholder="Filter"
               className={`w-72 ${fieldBaseClass}`}
             />
             <button
@@ -363,13 +365,13 @@ export default function VectorizePage() {
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Source Links</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Status</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Deployed at</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Sensitivitas</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Sensitivity</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 bg-white">
               {docs.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-4 py-6 text-center text-sm text-gray-500">Tidak ada data. Klik Refresh untuk memuat.</td>
+                  <td colSpan={6} className="px-4 py-6 text-center text-sm text-gray-500">No data. Click Refresh to load.</td>
                 </tr>
               )}
               {docs.map((d) => {

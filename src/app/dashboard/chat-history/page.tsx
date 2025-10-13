@@ -62,7 +62,7 @@ export default function ChatHistoryPage() {
       try {
         const token = getToken();
         if (!token) {
-          throw new Error("Token admin tidak ditemukan. Silakan login kembali.");
+          throw new Error("Admin token not found. Please log in again.");
         }
         const data = await listChatSessions(token, { limit: 200 });
         const sorted = [...data].sort((a, b) => (b.last_activity || "").localeCompare(a.last_activity || ""));
@@ -72,7 +72,7 @@ export default function ChatHistoryPage() {
         setSessions(sorted);
       } catch (err: any) {
         setSessions([]);
-        setSessionsError(err?.message || "Gagal memuat daftar session");
+        setSessionsError(err?.message || "Failed to load session list.");
       } finally {
         setSessionsLoading(false);
       }
@@ -107,7 +107,7 @@ export default function ChatHistoryPage() {
         }),
       );
     } catch (err: any) {
-      setHistoryState({ loading: false, error: err?.message || "Gagal memuat percakapan", data: null });
+      setHistoryState({ loading: false, error: err?.message || "Failed to load conversation.", data: null });
     }
   }, []);
 
@@ -142,7 +142,7 @@ export default function ChatHistoryPage() {
 
   const clearConversation = useCallback(async () => {
     if (!selectedSessionId) return;
-    const confirmed = window.confirm(`Hapus semua percakapan untuk session ${selectedSessionId}?`);
+    const confirmed = window.confirm(`Delete all conversations for session ${selectedSessionId}?`);
     if (!confirmed) return;
     setClearing(true);
     try {
@@ -151,7 +151,7 @@ export default function ChatHistoryPage() {
       setHistoryState({ loading: false, error: null, data: { session_id: selectedSessionId, messages: [], message_count: 0, ttl: null } });
       setSessionMeta((prev) => (prev ? { ...prev, exists: false, message_count: 0, ttl: null } : prev));
     } catch (err: any) {
-      setHistoryState((prev) => ({ ...prev, error: err?.message || "Gagal menghapus percakapan" }));
+      setHistoryState((prev) => ({ ...prev, error: err?.message || "Failed to delete conversation." }));
     } finally {
       setClearing(false);
     }
@@ -188,7 +188,7 @@ export default function ChatHistoryPage() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-semibold text-gray-900">Chat History</h2>
-          <p className="mt-1 text-sm text-gray-600">Pantau percakapan chat widget, lihat isi percakapan, dan bersihkan bila diperlukan.</p>
+          <p className="mt-1 text-sm text-gray-600">Monitor chat widget conversations, review transcripts, and clean them up when needed.</p>
         </div>
         <button
           type="button"
@@ -213,25 +213,25 @@ export default function ChatHistoryPage() {
               type="text"
               value={manualSessionId}
               onChange={(e) => setManualSessionId(e.target.value)}
-              placeholder="Masukkan session_id manual"
+              placeholder="Enter session_id manually"
               className="flex-1 rounded-md border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none"
             />
             <button
               type="submit"
               className="rounded-md bg-primary px-3 py-2 text-sm font-semibold text-white hover:opacity-90"
             >
-              Buka
+              Open
             </button>
           </form>
 
           <div className="mt-4 h-[420px] overflow-y-auto rounded-md border border-dashed border-gray-200">
             {sessionsLoading ? (
-              <div className="flex h-full items-center justify-center text-sm text-gray-500">Memuat sessions...</div>
+              <div className="flex h-full items-center justify-center text-sm text-gray-500">Loading sessions...</div>
             ) : sessionsError ? (
               <div className="p-4 text-sm text-red-600">{sessionsError}</div>
             ) : sessions.length === 0 ? (
               <div className="flex h-full items-center justify-center px-4 text-center text-sm text-gray-500">
-                Belum ada session di server. Mulai percakapan melalui widget untuk menghasilkan session_id baru.
+                No sessions available on the server yet. Start a conversation through the widget to generate a new session_id.
               </div>
             ) : (
               <ul className="divide-y divide-gray-200 text-sm">
@@ -245,9 +245,9 @@ export default function ChatHistoryPage() {
                         className={`flex w-full flex-col items-start gap-1 px-4 py-3 text-left ${active ? "bg-primary/10" : "hover:bg-gray-50"}`}
                       >
                         <span className="font-semibold text-gray-900">{session.session_id}</span>
-                        <span className="text-xs text-gray-500">Pesan: {session.message_count ?? "?"}</span>
+                        <span className="text-xs text-gray-500">Messages: {session.message_count ?? "?"}</span>
                         {session.last_activity && (
-                          <span className="text-xs text-gray-400">Aktivitas terakhir: {formatDate(session.last_activity)}</span>
+                          <span className="text-xs text-gray-400">Last activity: {formatDate(session.last_activity)}</span>
                         )}
                       </button>
                     </li>
@@ -262,7 +262,7 @@ export default function ChatHistoryPage() {
           {!selectedSessionId ? (
             <div className="flex h-full min-h-[380px] flex-col items-center justify-center text-center text-sm text-gray-500">
               <DocumentMagnifyingGlassIcon className="h-10 w-10 text-gray-400" />
-              <p className="mt-3">Pilih session untuk melihat percakapan.</p>
+              <p className="mt-3">Select a session to view the conversation.</p>
             </div>
           ) : (
             <div className="flex h-full flex-col">
@@ -272,13 +272,13 @@ export default function ChatHistoryPage() {
                   <div className="mt-1 flex flex-wrap items-center gap-4 text-xs text-gray-500">
                     <span className="inline-flex items-center gap-1">
                       <ChatBubbleLeftRightIcon className="h-4 w-4" />
-                      {messageCount} pesan
+                      {messageCount} messages
                     </span>
                     <span className="inline-flex items-center gap-1">
                       <ClockIcon className="h-4 w-4" />
                       TTL: {formatTtl(ttl)}
                     </span>
-                    {sessionMeta?.created_at && <span>Dibuat: {formatDate(sessionMeta.created_at)}</span>}
+                    {sessionMeta?.created_at && <span>Created: {formatDate(sessionMeta.created_at)}</span>}
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -289,7 +289,7 @@ export default function ChatHistoryPage() {
                     disabled={historyState.loading}
                   >
                     <ArrowPathIcon className={`h-4 w-4 ${historyState.loading ? "animate-spin" : ""}`} />
-                    Muat ulang
+                    Reload
                   </button>
                   <button
                     type="button"
@@ -298,7 +298,7 @@ export default function ChatHistoryPage() {
                     disabled={historyMessages.length === 0 || clearing}
                   >
                     <TrashIcon className={`h-4 w-4 ${clearing ? "animate-spin" : ""}`} />
-                    Hapus percakapan
+                    Delete conversation
                   </button>
                 </div>
               </div>
@@ -311,10 +311,10 @@ export default function ChatHistoryPage() {
 
               <div className="mt-4 flex-1 overflow-y-auto rounded-md border border-gray-100 bg-white p-4">
                 {historyState.loading ? (
-                  <div className="flex h-full items-center justify-center text-sm text-gray-500">Memuat percakapan...</div>
+                  <div className="flex h-full items-center justify-center text-sm text-gray-500">Loading conversation...</div>
                 ) : historyMessages.length === 0 ? (
                   <div className="flex h-full flex-col items-center justify-center text-center text-sm text-gray-500">
-                    Belum ada pesan untuk session ini atau histori sudah kedaluwarsa.
+                    No messages for this session yet or the history has expired.
                   </div>
                 ) : (
                   <ul className="space-y-4">
