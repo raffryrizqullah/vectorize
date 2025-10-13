@@ -1,5 +1,14 @@
 import { API_BASE_URL } from "./env";
 import { httpDelete, httpGet, httpPost } from "./http";
+import {
+  TOKEN_STORAGE_KEY,
+  getToken,
+  setToken,
+  clearToken,
+  handleUnauthorized,
+} from "./auth-storage";
+
+export { TOKEN_STORAGE_KEY, getToken, setToken, clearToken };
 
 export type LoginResponse = {
   access_token: string;
@@ -13,19 +22,6 @@ export type LoginResponse = {
     is_active?: boolean;
     created_at?: string;
   };
-};
-
-export const TOKEN_STORAGE_KEY = "jwt_token";
-
-export const getToken = () =>
-  typeof window !== "undefined" ? localStorage.getItem(TOKEN_STORAGE_KEY) : null;
-
-export const setToken = (token: string) => {
-  if (typeof window !== "undefined") localStorage.setItem(TOKEN_STORAGE_KEY, token);
-};
-
-export const clearToken = () => {
-  if (typeof window !== "undefined") localStorage.removeItem(TOKEN_STORAGE_KEY);
 };
 
 export async function loginRequest(
@@ -58,7 +54,10 @@ export async function loginRequest(
     return await httpPost<LoginResponse>(
       "/api/v1/auth/login",
       { username, password },
-      { headers: { Accept: "application/json" } },
+      {
+        headers: { Accept: "application/json" },
+        skipUnauthorizedHandling: true,
+      },
     );
   } catch (error: any) {
     throw new Error(sanitize(error?.message || "Login failed"));
@@ -202,6 +201,10 @@ export async function uploadDocuments(
     body: form,
   });
 
+  if (res.status === 401) {
+    handleUnauthorized();
+    throw new Error("Unauthorized");
+  }
   const ct = res.headers.get("content-type") || "";
   const body = ct.includes("application/json") ? await res.json().catch(() => undefined) : undefined;
   if (!res.ok) {
@@ -372,6 +375,10 @@ export async function listChatSessions(token?: string | null, opts?: { limit?: n
         headers,
         cache: "no-store",
       });
+      if (res.status === 401) {
+        handleUnauthorized();
+        throw new Error("Unauthorized");
+      }
       const data = await res.json().catch(() => undefined);
       if (res.status === 404) {
         lastError = new Error(`Endpoint ${endpoint} tidak ditemukan (404).`);

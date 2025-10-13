@@ -1,9 +1,11 @@
 import { API_BASE_URL } from "./env";
+import { handleUnauthorized } from "./auth-storage";
 
 type RequestOptions = RequestInit & {
   path: string;
   token?: string;
   searchParams?: Record<string, string | number | boolean | undefined>;
+  skipUnauthorizedHandling?: boolean;
 };
 
 function buildUrl(path: string, searchParams?: RequestOptions["searchParams"]) {
@@ -19,7 +21,7 @@ function buildUrl(path: string, searchParams?: RequestOptions["searchParams"]) {
 }
 
 export async function httpRequest<TResponse>(options: RequestOptions): Promise<TResponse> {
-  const { path, token, searchParams, headers, ...rest } = options;
+  const { path, token, searchParams, headers, skipUnauthorizedHandling = false, ...rest } = options;
   const url = buildUrl(path, searchParams);
   const mergedHeaders: HeadersInit = {
     Accept: "application/json",
@@ -32,6 +34,10 @@ export async function httpRequest<TResponse>(options: RequestOptions): Promise<T
     ...rest,
     headers: mergedHeaders,
   });
+  if (response.status === 401 && !skipUnauthorizedHandling) {
+    handleUnauthorized();
+    throw new Error("Unauthorized");
+  }
   const contentType = response.headers.get("content-type") || "";
   const body = contentType.includes("application/json")
     ? await response.json().catch(() => undefined)

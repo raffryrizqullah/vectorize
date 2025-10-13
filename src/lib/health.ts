@@ -1,4 +1,4 @@
-import { getToken } from "@/lib/api";
+import { getToken, handleUnauthorized } from "@/lib/auth-storage";
 import { API_BASE_URL } from "./env";
 
 const BASE_URL = API_BASE_URL;
@@ -95,6 +95,10 @@ export async function getHealthSummary(deep: boolean): Promise<Record<string, He
       headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       cache: "no-store",
     });
+    if (res.status === 401) {
+      handleUnauthorized();
+      return {};
+    }
     const body = await safeJson(res);
     if (!res.ok || !body) return {};
 
@@ -136,6 +140,10 @@ export async function getPineconeHealth(): Promise<HealthResult> {
       headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       cache: "no-store",
     });
+    if (res.status === 401) {
+      handleUnauthorized();
+      return { ok: false, status: "down", error: "Unauthorized" };
+    }
     const body = await safeJson(res);
     if (!res.ok) {
       return { ok: false, status: "down", error: sanitize(body?.detail || res.statusText), raw: body };
@@ -154,6 +162,10 @@ export async function getOpenAIHealth(): Promise<HealthResult> {
       headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       cache: "no-store",
     });
+    if (res.status === 401) {
+      handleUnauthorized();
+      return { ok: false, status: "down", error: "Unauthorized" };
+    }
     const body = await safeJson(res);
     if (!res.ok) {
       return { ok: false, status: "down", error: sanitize(body?.detail || res.statusText), raw: body };
@@ -172,6 +184,10 @@ export async function getRedisHealthDeep(): Promise<HealthResult> {
       headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       cache: "no-store",
     });
+    if (res.status === 401) {
+      handleUnauthorized();
+      return { ok: false, status: "unknown", error: "Unauthorized" };
+    }
     const body = await safeJson(res);
     if (!res.ok) return { ok: false, status: "down", error: sanitize(body?.detail || res.statusText), raw: body };
     const status = String(body?.status ?? body?.ok ?? "unknown");
@@ -188,6 +204,10 @@ export async function getDatabaseHealthDeep(): Promise<HealthResult> {
       headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       cache: "no-store",
     });
+    if (res.status === 401) {
+      handleUnauthorized();
+      return { ok: false, status: "unknown", error: "Unauthorized" };
+    }
     const body = await safeJson(res);
     if (!res.ok) return { ok: false, status: "down", error: sanitize(body?.detail || res.statusText), raw: body };
     const status = String(body?.status ?? body?.ok ?? "unknown");
@@ -204,6 +224,10 @@ export async function getStorageHealthDeep(): Promise<HealthResult> {
       headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       cache: "no-store",
     });
+    if (res.status === 401) {
+      handleUnauthorized();
+      return { ok: false, status: "unknown", error: "Unauthorized" };
+    }
     const body = await safeJson(res);
     if (!res.ok) return { ok: false, status: "down", error: sanitize(body?.detail || res.statusText), raw: body };
     const status = String(body?.status ?? body?.ok ?? "unknown");
