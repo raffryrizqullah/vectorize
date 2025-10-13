@@ -23,6 +23,7 @@ import {
   ArrowRightOnRectangleIcon,
   Cog6ToothIcon as CogSolidIcon,
 } from "@heroicons/react/20/solid";
+import { UserCircleIcon as UserCircleSolidIcon } from "@heroicons/react/24/solid";
 import { clearToken, getToken, meRequest } from "@/lib/api";
 import ChatWidget from "@/components/chat/Widget";
 
@@ -267,11 +268,9 @@ export default function DashboardLayout({
                   aria-haspopup="menu"
                   aria-expanded={userMenuOpen}
                 >
-                  <img
-                    alt=""
-                    src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=facearea&facepad=2&w=64&h=64&q=80"
-                    className="size-8 rounded-full bg-gray-50"
-                  />
+                  <span className="flex size-8 items-center justify-center rounded-full bg-primary/10 text-primary">
+                    <UserCircleSolidIcon className="size-6" />
+                  </span>
                   <span className="hidden lg:block text-sm/6 font-semibold text-gray-900">{userName ?? "User"}</span>
                   <ChevronDownIcon aria-hidden className="hidden lg:block size-5 text-gray-400" />
                 </button>
