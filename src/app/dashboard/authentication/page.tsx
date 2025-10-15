@@ -41,7 +41,7 @@ export default function AuthenticationPage() {
 
   async function refreshUsers() {
     const token = getToken();
-    if (!token) { setUsersError("Tidak ada token"); return; }
+    if (!token) { setUsersError("Missing token."); return; }
     setUsersLoading(true);
     setUsersError(null);
     try {
@@ -54,7 +54,7 @@ export default function AuthenticationPage() {
       });
       setUsers(data);
     } catch (e: any) {
-      setUsersError(e?.message || "Gagal memuat users");
+      setUsersError(e?.message || "Failed to load users.");
     } finally {
       setUsersLoading(false);
     }
@@ -62,11 +62,11 @@ export default function AuthenticationPage() {
 
   useEffect(() => {
     const token = getToken();
-    if (!token) { setMeError("Tidak ada token"); return; }
+    if (!token) { setMeError("Missing token."); return; }
     setMeLoading(true);
     meRequest(token)
       .then((u) => { setMe(u); setMeError(null); })
-      .catch((e) => setMeError(e?.message || "Gagal memuat profil"))
+      .catch((e) => setMeError(e?.message || "Failed to load profile."))
       .finally(() => setMeLoading(false));
   }, []);
 
@@ -75,19 +75,19 @@ export default function AuthenticationPage() {
     setRegError(null);
     setRegSuccess(null);
     const token = getToken();
-    if (!token) { setRegError("Tidak ada token"); return; }
+    if (!token) { setRegError("Missing token."); return; }
     if (form.password !== retype) {
-      setRegError("Password dan Retype password harus sama.");
+      setRegError("Password and confirmation must match.");
       return;
     }
     setRegLoading(true);
     try {
       await registerRequest(token, form);
-      setRegSuccess(`User ${form.username} berhasil dibuat.`);
+      setRegSuccess(`User ${form.username} created successfully.`);
       setForm({ username: "", email: "", password: "", full_name: "", role: "student" });
       setRetype("");
     } catch (err: any) {
-      setRegError(err?.message || "Register gagal");
+      setRegError(err?.message || "Registration failed.");
     } finally {
       setRegLoading(false);
     }
@@ -106,11 +106,11 @@ export default function AuthenticationPage() {
             className={secondaryButtonClass}
             onClick={() => {
               const token = getToken();
-              if (!token) { setMeError("Tidak ada token"); return; }
+              if (!token) { setMeError("Missing token."); return; }
               setMeLoading(true);
               meRequest(token)
                 .then((u) => { setMe(u); setMeError(null); })
-                .catch((e) => setMeError(e?.message || "Gagal memuat profil"))
+                .catch((e) => setMeError(e?.message || "Failed to load profile."))
                 .finally(() => setMeLoading(false));
             }}
             disabled={meLoading}
@@ -216,7 +216,7 @@ export default function AuthenticationPage() {
             <tbody className="divide-y divide-gray-200 bg-white">
               {users.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-4 py-6 text-center text-sm text-gray-500">Tidak ada data. Klik Refresh untuk memuat.</td>
+                  <td colSpan={6} className="px-4 py-6 text-center text-sm text-gray-500">No data. Click Refresh to load.</td>
                 </tr>
               )}
               {users.map((u)=>{
@@ -250,7 +250,7 @@ export default function AuthenticationPage() {
           <span className="rounded-md bg-primary p-2"><UserPlusIcon className="size-5 text-white" /></span>
           <h2 className="text-lg font-semibold text-gray-900">Register New User (Admin only)</h2>
         </div>
-        <p className="mt-1 text-sm text-gray-500">Buat user baru. Butuh token admin.</p>
+        <p className="mt-1 text-sm text-gray-500">Create a new user. Requires an admin token.</p>
         <form onSubmit={onRegister} className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <label className="block text-sm font-medium text-gray-900">Username</label>
@@ -312,7 +312,7 @@ export default function AuthenticationPage() {
               </button>
             </div>
             {mismatch && (
-              <p className="mt-1 text-xs text-red-600">Password dan Retype tidak sama.</p>
+              <p className="mt-1 text-xs text-red-600">Password and confirmation do not match.</p>
             )}
           </div>
           <div>
@@ -345,10 +345,10 @@ export default function AuthenticationPage() {
         <div className={loadingToastClass}>
           <span className="size-3 animate-spin rounded-full border-2 border-secondary/60 border-t-transparent" />
           {meLoading
-            ? "Memuat profil..."
+            ? "Loading profile..."
             : usersLoading
-            ? "Memuat daftar pengguna..."
-            : "Mendaftarkan pengguna baru..."}
+            ? "Loading users..."
+            : "Registering new user..."}
         </div>
       )}
     </div>

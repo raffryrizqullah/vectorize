@@ -37,7 +37,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const resp = await loginRequest(username, password);
-      // simpan token untuk sesi berikutnya
+      // Persist token for the next session
       if (typeof window !== "undefined") {
         localStorage.setItem(TOKEN_STORAGE_KEY, resp.access_token);
       }
@@ -47,17 +47,17 @@ export default function LoginPage() {
         const role = me?.role || me?.user?.role;
         if (role !== "admin") {
           if (typeof window !== "undefined") localStorage.removeItem(TOKEN_STORAGE_KEY);
-          setError("Hanya admin yang dapat mengakses dashboard.");
+          setError("Only administrators can access the dashboard.");
           return;
         }
       } catch {
         // If we cannot verify role, treat as failure
         if (typeof window !== "undefined") localStorage.removeItem(TOKEN_STORAGE_KEY);
-        setError("Gagal memverifikasi peran pengguna.");
+        setError("Failed to verify user role.");
         return;
       }
       setError(null);
-      // Prefetch health summary sekali saat login berhasil
+      // Prefetch health summary once login succeeds
       try {
         const summary = await getHealthSummary(true);
         const payload = { data: summary, ts: new Date().toISOString() };
@@ -65,7 +65,7 @@ export default function LoginPage() {
       } catch {}
       router.push("/dashboard");
     } catch (err: any) {
-      setError(err?.message || "Login gagal");
+      setError(err?.message || "Login failed.");
     } finally {
       setLoading(false);
     }
