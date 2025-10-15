@@ -562,7 +562,7 @@ const MagicBento: React.FC<BentoProps> = ({
           content: '';
           position: absolute;
           inset: 0;
-          padding: 6px;
+          padding: 9px;
           background: radial-gradient(var(--glow-radius) circle at var(--glow-x) var(--glow-y),
               rgba(${glowColor}, calc(var(--glow-intensity) * 0.8)) 0%,
               rgba(${glowColor}, calc(var(--glow-intensity) * 0.4)) 30%,
@@ -658,6 +658,7 @@ const MagicBento: React.FC<BentoProps> = ({
             const cardStyle: CSSProperties = {
               backgroundColor: card.color || "var(--background-light)",
               borderColor: "var(--border-color)",
+              borderWidth: "2px",
               color: "var(--text-primary)",
               "--glow-x": "50%",
               "--glow-y": "50%",

@@ -109,9 +109,13 @@ export default function DashboardLayout({
             </button>
             <div className="mt-12 flex w-full flex-col gap-y-5 overflow-y-auto">
               <div className="flex h-16 shrink-0 items-center">
-                <Link href="/dashboard" className="inline-block" onClick={() => setSidebarOpen(false)}>
-                  <span className="sr-only">Dashboard</span>
+                <Link
+                  href="/dashboard"
+                  className="inline-flex items-center gap-2 text-white"
+                  onClick={() => setSidebarOpen(false)}
+                >
                   <CubeTransparentIcon aria-hidden className="h-8 w-8 text-white" />
+                  <span className="text-lg font-semibold tracking-wide">Vectorize App</span>
                 </Link>
               </div>
               <nav className="flex flex-1 flex-col">
@@ -171,9 +175,9 @@ export default function DashboardLayout({
       <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
         <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-primary px-6 pb-4">
           <div className="flex h-16 shrink-0 items-center">
-            <Link href="/dashboard" className="inline-block">
-              <span className="sr-only">Dashboard</span>
+            <Link href="/dashboard" className="inline-flex items-center gap-2 text-white">
               <CubeTransparentIcon aria-hidden className="h-8 w-8 text-white" />
+              <span className="text-lg font-semibold tracking-wide">Vectorize App</span>
             </Link>
           </div>
           <nav className="flex flex-1 flex-col">
@@ -241,7 +245,11 @@ export default function DashboardLayout({
 
           <div aria-hidden className="h-6 w-px bg-gray-900/10 lg:hidden" />
 
-          <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
+          <div className="flex flex-1 items-center gap-x-4 self-stretch lg:gap-x-6">
+            <div className="hidden items-center gap-2 pr-4 text-primary lg:flex">
+              <CubeTransparentIcon aria-hidden className="h-7 w-7" />
+              <span className="text-lg font-semibold tracking-wide text-primary">Vectorize App</span>
+            </div>
             <form action="#" method="GET" className="grid flex-1 grid-cols-1">
               <input
                 name="search"
