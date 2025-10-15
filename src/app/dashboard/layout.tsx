@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ComponentType, type ReactNode, type SVGProps } from "react";
 import {
   Bars3Icon,
   BellIcon,
@@ -30,7 +30,7 @@ import ChatWidget from "@/components/chat/Widget";
 type NavItem = {
   name: string;
   href: string;
-  icon: (props: React.SVGProps<SVGSVGElement>) => JSX.Element;
+  icon: ComponentType<SVGProps<SVGSVGElement>>;
 };
 
 const navigation: NavItem[] = [
@@ -49,7 +49,7 @@ function classNames(...classes: Array<string | false | null | undefined>) {
 export default function DashboardLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   const router = useRouter();
   const pathname = usePathname();

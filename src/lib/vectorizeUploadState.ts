@@ -8,7 +8,9 @@ class VectorizeUploadState {
     this.listeners.add(fn);
     // call immediately with current state
     fn(this.uploading, this.inFlight);
-    return () => this.listeners.delete(fn);
+    return () => {
+      this.listeners.delete(fn);
+    };
   }
 
   get uploading() {
@@ -32,4 +34,3 @@ class VectorizeUploadState {
 }
 
 export const vectorizeUploadState = new VectorizeUploadState();
-

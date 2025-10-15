@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, type ComponentType } from "react";
 import Link from "next/link";
 import {
   ChartBarIcon,
@@ -29,7 +29,7 @@ import {
   alertStyles,
 } from "@/styles/design";
 
-type IconRenderer = (props: { className?: string }) => JSX.Element;
+type IconRenderer = ComponentType<{ className?: string }>;
 
 type QuickAction = {
   label: string;

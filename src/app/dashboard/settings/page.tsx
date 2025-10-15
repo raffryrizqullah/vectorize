@@ -118,7 +118,7 @@ export default function SettingsPage() {
     }
   };
 
-  const themeOptions = useMemo(
+  const themeOptions = useMemo<Array<{ label: string; value: PreferenceState["theme"] }>>(
     () => [
       { label: "System", value: "system" },
       { label: "Light", value: "light" },

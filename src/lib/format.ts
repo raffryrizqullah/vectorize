@@ -15,6 +15,9 @@ export type QueryApiResponse = {
   session_id?: string;
   sources?: { documents?: SourceDoc[] } | null;
   retrieved_documents?: RetrievedDoc[] | null;
+  detail?: string;
+  message?: string;
+  error?: string;
 };
 
 function normalizeLink(v?: string | null): string | null {
@@ -70,4 +73,3 @@ export function formatQueryResponseToMarkdown(
 
   return parts.join("\n\n").trim();
 }
-

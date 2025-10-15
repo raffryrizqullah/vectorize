@@ -2,7 +2,6 @@
 import React, { forwardRef, useMemo, useRef, useLayoutEffect } from "react";
 import { Canvas, useFrame, useThree, RootState } from "@react-three/fiber";
 import { Color, Mesh, ShaderMaterial } from "three";
-import type { IUniform } from "three";
 
 type NormalizedRGB = [number, number, number];
 
@@ -25,7 +24,7 @@ interface SilkUniforms {
   uColor: UniformValue<Color>;
   uRotation: UniformValue<number>;
   uTime: UniformValue<number>;
-  [uniform: string]: IUniform;
+  [uniform: string]: UniformValue<any>;
 }
 
 const vertexShader = `

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, type ComponentType } from "react";
 import {
   getApiHealth,
   getOpenAIHealth,
@@ -19,7 +19,7 @@ const MagicBento = dynamic(() => import("@/components/MagicBento"), { ssr: false
 const CountUp = dynamic(() => import("@/components/CountUp"), { ssr: false });
 
 type CardKey = "api" | "pinecone" | "openai" | "redis" | "database" | "storage";
-type Card = { key: CardKey; title: string; fetcher: () => Promise<HealthResult>; icon: (props: any) => JSX.Element };
+type Card = { key: CardKey; title: string; fetcher: () => Promise<HealthResult>; icon: ComponentType<any> };
 
 const CARDS: Card[] = [
   { key: "api", title: "API Service", fetcher: getApiHealth, icon: ServerIcon },

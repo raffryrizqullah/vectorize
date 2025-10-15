@@ -64,8 +64,25 @@ export async function loginRequest(
   }
 }
 
-export async function meRequest(token: string) {
-  return httpGet("/api/v1/auth/me", { token });
+export type MeResponse = {
+  id?: string;
+  username?: string;
+  email?: string;
+  full_name?: string | null;
+  role?: string | null;
+  user?: {
+    id?: string;
+    username?: string;
+    email?: string;
+    full_name?: string | null;
+    role?: string | null;
+    [key: string]: any;
+  } | null;
+  [key: string]: any;
+};
+
+export async function meRequest(token: string): Promise<MeResponse> {
+  return httpGet<MeResponse>("/api/v1/auth/me", { token });
 }
 
 export type RegisterBody = {
@@ -256,7 +273,7 @@ export type ChatSessionInfo = {
   created_at?: string;
   last_activity?: string;
   expires_at?: string;
-  ttl?: number;
+  ttl?: number | null;
   metadata?: Record<string, any> | null;
   [key: string]: any;
 };
