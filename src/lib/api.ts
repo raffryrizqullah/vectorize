@@ -113,6 +113,12 @@ export type UserSummary = {
   created_at?: string;
 };
 
+export type DeleteUserResponse = {
+  success: boolean;
+  message?: string;
+  deleted_user?: UserSummary | null;
+};
+
 export async function listUsers(
   token: string,
   opts?: { search?: string; role?: string; is_active?: boolean; limit?: number; offset?: number }
@@ -131,6 +137,11 @@ export async function listUsers(
   if (Array.isArray(body)) return body as UserSummary[];
   if (body?.users && Array.isArray(body.users)) return body.users as UserSummary[];
   return [];
+}
+
+export async function deleteUserAccount(token: string, userId: string): Promise<DeleteUserResponse> {
+  const safeId = encodeURIComponent(userId);
+  return httpDelete<DeleteUserResponse>(`/api/v1/users/${safeId}`, { token });
 }
 
 // API Keys

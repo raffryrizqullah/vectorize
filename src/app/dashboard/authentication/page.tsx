@@ -1,8 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getToken, meRequest, registerRequest, type RegisterBody, listUsers, type UserSummary } from "@/lib/api";
-import { UserCircleIcon, UserPlusIcon, EyeIcon, EyeSlashIcon, UsersIcon } from "@heroicons/react/24/outline";
+import {
+  getToken,
+  meRequest,
+  registerRequest,
+  deleteUserAccount,
+  type RegisterBody,
+  listUsers,
+  type UserSummary,
+} from "@/lib/api";
+import { UserCircleIcon, UserPlusIcon, EyeIcon, EyeSlashIcon, UsersIcon, TrashIcon } from "@heroicons/react/24/outline";
 import {
   cardSurfaceClass,
   primaryButtonClass,
@@ -40,10 +48,16 @@ export default function AuthenticationPage() {
   const [activeOnly, setActiveOnly] = useState(false);
   const [limit, setLimit] = useState<number>(50);
   const [offset, setOffset] = useState<number>(0);
+  const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [deleteSuccess, setDeleteSuccess] = useState<string | null>(null);
 
   const currentRole = normalizeRoleValue(me?.role ?? me?.user?.role);
   const creationRoleOptions = getRoleOptions(currentRole === "SUPER_ADMIN");
   const filterRoleOptions = getRoleOptions(true);
+  const showDeleteActions = currentRole === "SUPER_ADMIN";
+  const tableColumnCount = showDeleteActions ? 7 : 6;
+  const meId = me?.id ?? me?.user?.id ?? null;
 
   useEffect(() => {
     if (!creationRoleOptions.length) return;
@@ -74,6 +88,36 @@ export default function AuthenticationPage() {
       setUsersError(e?.message || "Failed to load users.");
     } finally {
       setUsersLoading(false);
+    }
+  }
+
+  async function handleDeleteUser(user: UserSummary) {
+    if (!user?.id) return;
+    if (!window.confirm(`Delete user ${user.username}? This action cannot be undone.`)) {
+      return;
+    }
+    if (meId && user.id === meId) {
+      setDeleteError("Cannot delete your own account.");
+      return;
+    }
+    const token = getToken();
+    if (!token) {
+      setDeleteError("Missing token.");
+      return;
+    }
+    setDeleteError(null);
+    setDeleteSuccess(null);
+    setDeletingUserId(user.id);
+    try {
+      const response = await deleteUserAccount(token, user.id);
+      const successMessage = response?.message || `User ${user.username} deleted successfully.`;
+      setDeleteSuccess(successMessage);
+      await refreshUsers();
+    } catch (err: any) {
+      const message = err?.message || "Failed to delete user.";
+      setDeleteError(message);
+    } finally {
+      setDeletingUserId(null);
     }
   }
 
@@ -219,7 +263,9 @@ export default function AuthenticationPage() {
             </button>
           </div>
         </div>
+        {deleteSuccess && <div className={`${alertStyles.success} mt-3`}>{deleteSuccess}</div>}
         {usersError && <div className={`${alertStyles.error} mt-3`}>{usersError}</div>}
+        {deleteError && <div className={`${alertStyles.error} mt-3`}>{deleteError}</div>}
         <div className="mt-4 overflow-x-auto max-h-[60vh] overflow-y-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -230,12 +276,15 @@ export default function AuthenticationPage() {
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Role</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Active</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Created at</th>
+                {showDeleteActions && (
+                  <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">Actions</th>
+                )}
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 bg-white">
               {users.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-4 py-6 text-center text-sm text-gray-500">No data. Click Refresh to load.</td>
+                  <td colSpan={tableColumnCount} className="px-4 py-6 text-center text-sm text-gray-500">No data. Click Refresh to load.</td>
                 </tr>
               )}
               {users.map((u)=>{
@@ -244,6 +293,9 @@ export default function AuthenticationPage() {
                   const pad=(n:number)=>String(n).padStart(2,'0');
                   return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
                 };
+                const isSelf = Boolean(meId && u.id === meId);
+                const isDeleting = deletingUserId === u.id;
+                const deleteDisabled = isSelf || isDeleting;
                 return (
                   <tr key={u.id}>
                     <td className="px-4 py-3">
@@ -257,6 +309,19 @@ export default function AuthenticationPage() {
                       <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${u.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>{u.is_active ? 'active' : 'inactive'}</span>
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-700">{created ? <span className="font-mono text-xs">{format(created)}</span> : '-'}</td>
+                    {showDeleteActions && (
+                      <td className="px-4 py-3 text-right">
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteUser(u)}
+                          disabled={deleteDisabled}
+                          className="inline-flex items-center gap-2 rounded-md border border-red-200 px-3 py-1.5 text-sm font-semibold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          <TrashIcon className={`h-4 w-4 ${isDeleting ? "animate-spin" : ""}`} />
+                          Delete
+                        </button>
+                      </td>
+                    )}
                   </tr>
                 );
               })}
