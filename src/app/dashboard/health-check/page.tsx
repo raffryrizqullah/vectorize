@@ -25,9 +25,9 @@ const CARDS: Card[] = [
   { key: "api", title: "API Service", fetcher: getApiHealth, icon: ServerIcon },
   { key: "pinecone", title: "Pinecone Vector DB", fetcher: getPineconeHealth, icon: CubeIcon },
   { key: "openai", title: "OpenAI Service", fetcher: getOpenAIHealth, icon: CpuChipIcon },
-  { key: "redis", title: "Redis Cache (deep)", fetcher: getRedisHealthDeep, icon: BoltIcon },
-  { key: "database", title: "Database (deep)", fetcher: getDatabaseHealthDeep, icon: CircleStackIcon },
-  { key: "storage", title: "Storage (deep)", fetcher: getStorageHealthDeep, icon: CloudIcon },
+  { key: "redis", title: "Redis Cache", fetcher: getRedisHealthDeep, icon: BoltIcon },
+  { key: "database", title: "Database", fetcher: getDatabaseHealthDeep, icon: CircleStackIcon },
+  { key: "storage", title: "Storage", fetcher: getStorageHealthDeep, icon: CloudIcon },
 ];
 
 function StatusDot({ state }: { state: "ok" | "down" | "unknown" }) {
