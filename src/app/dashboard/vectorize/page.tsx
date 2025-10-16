@@ -331,17 +331,17 @@ export default function VectorizePage() {
 
       {/* Documents table */}
       <div className={cardSurfaceClass}>
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex items-center gap-2">
             <span className="rounded-md bg-primary p-2"><DocumentTextIcon className="size-5 text-white" /></span>
             <h3 className="text-base font-semibold text-gray-900">Indexed Documents</h3>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
             <input
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
               placeholder="Filter"
-              className={`w-72 ${fieldBaseClass}`}
+              className={`w-full sm:w-72 ${fieldBaseClass}`}
             />
             <button
               type="button"
