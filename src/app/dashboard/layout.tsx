@@ -323,10 +323,6 @@ export default function DashboardLayout({
           <div aria-hidden className="h-6 w-px bg-gray-900/10 lg:hidden" />
 
           <div className="flex flex-1 items-center gap-x-4 self-stretch lg:gap-x-6">
-            <div className="hidden items-center gap-2 pr-4 text-primary lg:flex">
-              <CubeTransparentIcon aria-hidden className="h-7 w-7" />
-              <span className="text-lg font-semibold tracking-wide text-primary">Vectorize App</span>
-            </div>
             <form action="#" method="GET" className="grid flex-1 grid-cols-1">
               <input
                 name="search"
