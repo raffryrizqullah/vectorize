@@ -3,7 +3,7 @@
 import { useRef } from "react";
 import Link from "next/link";
 import { CubeTransparentIcon } from "@heroicons/react/24/outline";
-import PixelBlast from "@/components/PixelBlast";
+import Silk from "@/components/Silk";
 import VariableProximity from "@/components/VariableProximity";
 
 export default function Home() {
@@ -12,26 +12,8 @@ export default function Home() {
   return (
     <div className="bg-background">
       <div className="relative isolate overflow-hidden pt-14">
-        <div className="absolute inset-0 -z-30">
-          <PixelBlast
-            variant="circle"
-            pixelSize={6}
-            color="#06337b"
-            patternScale={3}
-            patternDensity={1.2}
-            pixelSizeJitter={0.5}
-            enableRipples
-            rippleSpeed={0.4}
-            rippleThickness={0.12}
-            rippleIntensityScale={1.5}
-            liquid
-            liquidStrength={0.12}
-            liquidRadius={1.2}
-            liquidWobbleSpeed={5}
-            speed={0.6}
-            edgeFade={0.25}
-            transparent
-          />
+        <div className="absolute inset-0 -z-30 overflow-hidden">
+          <Silk speed={4.2} scale={1.25} noiseIntensity={1} color="#06337b" rotation={0.35} />
         </div>
         <div
           aria-hidden="true"
