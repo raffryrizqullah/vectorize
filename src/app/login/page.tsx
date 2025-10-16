@@ -8,6 +8,7 @@ import { loginRequest, TOKEN_STORAGE_KEY, getToken, meRequest } from "@/lib/api"
 import { getHealthSummary } from "@/lib/health";
 import Silk from "@/components/Silk";
 import { fieldInputClass, alertStyles } from "@/styles/design";
+import { isAdminRole } from "@/lib/roles";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -15,14 +16,13 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [showPwd, setShowPwd] = useState(false);
 
-  // If already authenticated, redirect only if admin
+  // If already authenticated, redirect only for admin roles
   useEffect(() => {
     const token = getToken();
     if (!token) return;
     meRequest(token)
       .then((u) => {
-        const role = u?.role || u?.user?.role;
-        if (role === "admin") {
+        if (isAdminRole(u?.role ?? u?.user?.role)) {
           router.replace("/dashboard");
         }
       })
@@ -41,13 +41,12 @@ export default function LoginPage() {
       if (typeof window !== "undefined") {
         localStorage.setItem(TOKEN_STORAGE_KEY, resp.access_token);
       }
-      // Allow only admin role to proceed
+      // Allow only admin roles to proceed
       try {
         const me = await meRequest(resp.access_token);
-        const role = me?.role || me?.user?.role;
-        if (role !== "admin") {
+        if (!isAdminRole(me?.role ?? me?.user?.role)) {
           if (typeof window !== "undefined") localStorage.removeItem(TOKEN_STORAGE_KEY);
-          setError("Only administrators can access the dashboard.");
+          setError("Only administrator accounts can access the dashboard.");
           return;
         }
       } catch {

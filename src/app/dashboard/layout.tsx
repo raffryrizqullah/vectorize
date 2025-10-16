@@ -26,6 +26,7 @@ import {
 } from "@heroicons/react/20/solid";
 import { UserCircleIcon as UserCircleSolidIcon } from "@heroicons/react/24/solid";
 import { clearToken, getToken, meRequest } from "@/lib/api";
+import { isAdminRole, normalizeRoleValue } from "@/lib/roles";
 import ChatWidget from "@/components/chat/Widget";
 
 type NavItem = {
@@ -131,7 +132,7 @@ export default function DashboardLayout({
     };
   }, [sidebarOpen]);
 
-  // Guard: verify token and ensure admin role, then load user
+  // Guard: verify token and ensure admin-level role, then load user
   useEffect(() => {
     const token = getToken();
     if (!token) {
@@ -140,8 +141,8 @@ export default function DashboardLayout({
     }
     meRequest(token)
       .then((u) => {
-        const role = u?.role || u?.user?.role;
-        if (role !== "admin") {
+        const normalizedRole = normalizeRoleValue(u?.role ?? u?.user?.role);
+        if (!isAdminRole(normalizedRole)) {
           clearToken();
           router.replace("/login");
           return;

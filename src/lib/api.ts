@@ -7,6 +7,7 @@ import {
   clearToken,
   handleUnauthorized,
 } from "./auth-storage";
+import { normalizeRoleValue, UserRole } from "./roles";
 
 export { TOKEN_STORAGE_KEY, getToken, setToken, clearToken };
 
@@ -18,7 +19,7 @@ export type LoginResponse = {
     username: string;
     email: string;
     full_name?: string;
-    role?: string;
+    role?: UserRole | string;
     is_active?: boolean;
     created_at?: string;
   };
@@ -69,13 +70,13 @@ export type MeResponse = {
   username?: string;
   email?: string;
   full_name?: string | null;
-  role?: string | null;
+  role?: UserRole | string | null;
   user?: {
     id?: string;
     username?: string;
     email?: string;
     full_name?: string | null;
-    role?: string | null;
+    role?: UserRole | string | null;
     [key: string]: any;
   } | null;
   [key: string]: any;
@@ -90,11 +91,15 @@ export type RegisterBody = {
   email: string;
   password: string;
   full_name: string;
-  role?: string; // admin | lecturer | student
+  role?: UserRole;
 };
 
 export async function registerRequest(token: string, body: RegisterBody) {
-  return httpPost("/api/v1/auth/register", body, { token });
+  const payload: RegisterBody = {
+    ...body,
+    role: body.role ? (normalizeRoleValue(body.role) as UserRole) : undefined,
+  };
+  return httpPost("/api/v1/auth/register", payload, { token });
 }
 
 // Admin users list
@@ -103,7 +108,7 @@ export type UserSummary = {
   username: string;
   email: string;
   full_name?: string | null;
-  role?: string | null;
+  role?: UserRole | string | null;
   is_active?: boolean;
   created_at?: string;
 };
@@ -112,9 +117,10 @@ export async function listUsers(
   token: string,
   opts?: { search?: string; role?: string; is_active?: boolean; limit?: number; offset?: number }
 ): Promise<UserSummary[]> {
+  const normalizedRoleFilter = opts?.role ? normalizeRoleValue(opts.role) : null;
   const searchParams: Record<string, string | undefined> = {
     search: opts?.search || undefined,
-    role: opts?.role || undefined,
+    role: normalizedRoleFilter || undefined,
     is_active: typeof opts?.is_active === "boolean" ? String(opts.is_active) : undefined,
     limit: opts?.limit !== undefined ? String(opts.limit) : undefined,
     offset: opts?.offset !== undefined ? String(opts.offset) : undefined,

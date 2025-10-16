@@ -14,13 +14,15 @@ import {
   toggleInputClass,
   loadingToastClass,
 } from "@/styles/design";
+import { formatRoleLabel, getRoleOptions, normalizeRoleValue } from "@/lib/roles";
+import type { UserRole } from "@/lib/roles";
 
 export default function AuthenticationPage() {
   const [me, setMe] = useState<any>(null);
   const [meError, setMeError] = useState<string | null>(null);
   const [meLoading, setMeLoading] = useState<boolean>(false);
 
-  const [form, setForm] = useState<RegisterBody>({ username: "", email: "", password: "", full_name: "", role: "student" });
+  const [form, setForm] = useState<RegisterBody>({ username: "", email: "", password: "", full_name: "", role: "STUDENT" });
   const [regLoading, setRegLoading] = useState<boolean>(false);
   const [regError, setRegError] = useState<string | null>(null);
   const [regSuccess, setRegSuccess] = useState<string | null>(null);
@@ -34,10 +36,25 @@ export default function AuthenticationPage() {
   const [usersLoading, setUsersLoading] = useState(false);
   const [usersError, setUsersError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
-  const [roleFilter, setRoleFilter] = useState("");
+  const [roleFilter, setRoleFilter] = useState<UserRole | "">("");
   const [activeOnly, setActiveOnly] = useState(false);
   const [limit, setLimit] = useState<number>(50);
   const [offset, setOffset] = useState<number>(0);
+
+  const currentRole = normalizeRoleValue(me?.role ?? me?.user?.role);
+  const creationRoleOptions = getRoleOptions(currentRole === "SUPER_ADMIN");
+  const filterRoleOptions = getRoleOptions(true);
+
+  useEffect(() => {
+    if (!creationRoleOptions.length) return;
+    if (form.role && creationRoleOptions.some((option) => option.value === form.role)) return;
+    const fallback =
+      creationRoleOptions.find((option) => option.value === "STUDENT") ??
+      creationRoleOptions[creationRoleOptions.length - 1];
+    if (fallback && form.role !== fallback.value) {
+      setForm((prev) => ({ ...prev, role: fallback.value }));
+    }
+  }, [creationRoleOptions, form.role]);
 
   async function refreshUsers() {
     const token = getToken();
@@ -84,7 +101,7 @@ export default function AuthenticationPage() {
     try {
       await registerRequest(token, form);
       setRegSuccess(`User ${form.username} created successfully.`);
-      setForm({ username: "", email: "", password: "", full_name: "", role: "student" });
+      setForm({ username: "", email: "", password: "", full_name: "", role: "STUDENT" });
       setRetype("");
     } catch (err: any) {
       setRegError(err?.message || "Registration failed.");
@@ -135,7 +152,7 @@ export default function AuthenticationPage() {
             </div>
             <div>
               <div className="text-sm text-gray-500">Role</div>
-              <div className="text-sm font-medium text-gray-900">{me.role}</div>
+              <div className="text-sm font-medium text-gray-900">{formatRoleLabel(me.role ?? me.user?.role)}</div>
             </div>
             <div>
               <div className="text-sm text-gray-500">Created at</div>
@@ -161,13 +178,15 @@ export default function AuthenticationPage() {
             />
             <select
               value={roleFilter}
-              onChange={(e) => setRoleFilter(e.target.value)}
+              onChange={(e) => setRoleFilter((e.target.value as UserRole) || "")}
               className={`w-40 ${fieldSelectClass}`}
             >
               <option value="">All roles</option>
-              <option value="student">student</option>
-              <option value="lecturer">lecturer</option>
-              <option value="admin">admin</option>
+              {filterRoleOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
             </select>
             <label className="flex items-center gap-2 rounded-2xl border border-secondary/10 bg-secondary/5 px-3 py-2 text-sm text-secondary/70">
               <input
@@ -233,7 +252,7 @@ export default function AuthenticationPage() {
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-700">{u.full_name || '-'}</td>
                     <td className="px-4 py-3 text-sm text-gray-700">{u.email}</td>
-                    <td className="px-4 py-3 text-sm text-gray-700">{u.role || '-'}</td>
+                    <td className="px-4 py-3 text-sm text-gray-700">{formatRoleLabel(u.role)}</td>
                     <td className="px-4 py-3">
                       <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${u.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>{u.is_active ? 'active' : 'inactive'}</span>
                     </td>
@@ -250,7 +269,7 @@ export default function AuthenticationPage() {
           <span className="rounded-md bg-primary p-2"><UserPlusIcon className="size-5 text-white" /></span>
           <h2 className="text-lg font-semibold text-gray-900">Register New User (Admin only)</h2>
         </div>
-        <p className="mt-1 text-sm text-gray-500">Create a new user. Requires an admin token.</p>
+        <p className="mt-1 text-sm text-gray-500">Create a new user. Requires an administrator or super administrator token.</p>
         <form onSubmit={onRegister} className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <label className="block text-sm font-medium text-gray-900">Username</label>
@@ -318,13 +337,15 @@ export default function AuthenticationPage() {
           <div>
             <label className="block text-sm font-medium text-gray-900">Role</label>
             <select
-              value={form.role}
-              onChange={(e) => setForm({ ...form, role: e.target.value })}
+              value={form.role ?? ""}
+              onChange={(e) => setForm({ ...form, role: e.target.value as UserRole })}
               className={`mt-1 ${fieldSelectClass}`}
             >
-              <option value="student">student</option>
-              <option value="lecturer">lecturer</option>
-              <option value="admin">admin</option>
+              {creationRoleOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
             </select>
           </div>
 

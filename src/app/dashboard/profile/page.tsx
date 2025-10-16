@@ -29,6 +29,7 @@ import {
   loadingToastClass,
   mutedBadgeClass,
 } from "@/styles/design";
+import { formatRoleLabel, normalizeRoleValue } from "@/lib/roles";
 
 type NormalizedUser = {
   username: string;
@@ -75,11 +76,12 @@ export default function ProfilePage() {
   const user: NormalizedUser | null = useMemo(() => {
     if (!userPayload) return null;
     const raw = userPayload.user ?? userPayload;
+    const normalizedRole = normalizeRoleValue(raw?.role ?? raw?.user_role) ?? "STUDENT";
     return {
       username: raw?.username ?? "Unknown",
       fullName: raw?.full_name ?? raw?.name ?? raw?.username ?? "No Name",
       email: raw?.email ?? "—",
-      role: (raw?.role ?? raw?.user_role ?? "member").toString(),
+      role: normalizedRole,
       active: Boolean(raw?.is_active ?? true),
       createdAt: raw?.created_at ?? raw?.joined_at ?? raw?.createdAt,
       metadata: raw?.metadata ?? null,
@@ -119,7 +121,7 @@ export default function ProfilePage() {
     if (!user) return [];
     const badges = [
       {
-        label: user.role,
+        label: formatRoleLabel(user.role),
         tone: "text-primary bg-primary/10 border border-primary/10",
       },
       {
@@ -272,7 +274,7 @@ export default function ProfilePage() {
               <p className="text-xs uppercase tracking-[0.2em] text-secondary/50">Role</p>
               <div className="mt-2 flex items-center gap-2 text-sm text-secondary">
                 <ShieldCheckIcon className="h-4 w-4 text-primary" />
-                <span className="capitalize">{user?.role || "—"}</span>
+                <span>{formatRoleLabel(user?.role)}</span>
               </div>
             </div>
             <div className="rounded-2xl bg-secondary/5 p-4">
