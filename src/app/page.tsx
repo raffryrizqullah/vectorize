@@ -1,16 +1,31 @@
 "use client";
 
-import { useRef } from "react";
-import Link from "next/link";
+import { useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { CubeTransparentIcon } from "@heroicons/react/24/outline";
 import Silk from "@/components/Silk";
 import VariableProximity from "@/components/VariableProximity";
+import PixelTransitionOverlay from "@/components/PixelTransitionOverlay";
 
 export default function Home() {
   const heroRef = useRef<HTMLDivElement | null>(null);
+  const [transitioning, setTransitioning] = useState(false);
+  const router = useRouter();
+
+  const handleGetStarted = () => {
+    if (transitioning) return;
+    setTransitioning(true);
+  };
 
   return (
     <div className="bg-background text-white">
+      <PixelTransitionOverlay
+        active={transitioning}
+        onComplete={() => router.push("/login")}
+        gridSize={18}
+        color="#06337b"
+        duration={0.5}
+      />
       <div className="relative isolate overflow-hidden min-h-screen pt-14">
         <div className="absolute inset-0 -z-30 overflow-hidden">
           <Silk speed={4.2} scale={1.25} noiseIntensity={1} color="#06337b" rotation={0.35} />
@@ -52,12 +67,14 @@ export default function Home() {
             />
           </p>
           <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-            <Link
-              href="/login"
-              className="rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white shadow-lg transition hover:bg-primary/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            <button
+              type="button"
+              onClick={handleGetStarted}
+              disabled={transitioning}
+              className="rounded-full bg-white px-6 py-3 text-sm font-semibold text-primary shadow-lg transition hover:bg-white/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white disabled:cursor-not-allowed disabled:opacity-80"
             >
               Get started
-            </Link>
+            </button>
           </div>
         </div>
       </div>
