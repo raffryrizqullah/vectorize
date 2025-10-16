@@ -299,7 +299,7 @@ export default function HealthCheckPage() {
                 checked={autoRefresh}
                 onChange={(e) => setAutoRefresh(e.target.checked)}
               />
-              Auto refresh (30s)
+              Auto
             </label>
             <button
               type="button"

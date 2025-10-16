@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState, type ComponentType, type ReactNode, type SVGProps } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type ComponentType, type ReactNode, type SVGProps } from "react";
+import { gsap } from "gsap";
 import {
   Bars3Icon,
   BellIcon,
@@ -57,8 +58,78 @@ export default function DashboardLayout({
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
   const [userName, setUserName] = useState<string | null>(null);
+  const mobileContainerRef = useRef<HTMLDivElement | null>(null);
+  const mobileSidebarRef = useRef<HTMLDivElement | null>(null);
+  const mobileBackdropRef = useRef<HTMLDivElement | null>(null);
+  const mobileTlRef = useRef<gsap.core.Timeline | null>(null);
 
   const isActive = (href: string) => pathname === href;
+
+  useLayoutEffect(() => {
+    const panel = mobileSidebarRef.current;
+    const backdrop = mobileBackdropRef.current;
+    const container = mobileContainerRef.current;
+    if (!panel || !backdrop || !container) return;
+
+    const ctx = gsap.context(() => {
+      gsap.set(panel, { xPercent: -105, opacity: 0 });
+      gsap.set(backdrop, { opacity: 0 });
+    });
+    panel.style.pointerEvents = "none";
+    backdrop.style.pointerEvents = "none";
+    container.classList.add("pointer-events-none");
+    return () => ctx.revert();
+  }, []);
+
+  useEffect(() => {
+    const panel = mobileSidebarRef.current;
+    const backdrop = mobileBackdropRef.current;
+    const container = mobileContainerRef.current;
+    if (!panel || !backdrop || !container) return;
+
+    mobileTlRef.current?.kill();
+
+    if (sidebarOpen) {
+      container.classList.remove("pointer-events-none");
+      panel.style.pointerEvents = "auto";
+      backdrop.style.pointerEvents = "auto";
+
+      const items = Array.from(panel.querySelectorAll(".mobile-nav-item")) as HTMLElement[];
+      if (items.length) {
+        gsap.set(items, { y: 16, opacity: 0 });
+      }
+
+      mobileTlRef.current = gsap
+        .timeline({ defaults: { ease: "power3.out" } })
+        .to(backdrop, { opacity: 1, duration: 0.25 }, 0)
+        .to(panel, { xPercent: 0, opacity: 1, duration: 0.55, ease: "power4.out" }, 0);
+
+      if (items.length) {
+        mobileTlRef.current.to(
+          items,
+          { y: 0, opacity: 1, duration: 0.4, stagger: 0.08 },
+          "-=0.25",
+        );
+      }
+    } else {
+      panel.style.pointerEvents = "none";
+      backdrop.style.pointerEvents = "auto";
+      mobileTlRef.current = gsap
+        .timeline({
+          defaults: { ease: "power3.in" },
+          onComplete: () => {
+            container.classList.add("pointer-events-none");
+            backdrop.style.pointerEvents = "none";
+          },
+        })
+        .to(panel, { xPercent: -105, opacity: 0, duration: 0.4 }, 0)
+        .to(backdrop, { opacity: 0, duration: 0.3 }, 0);
+    }
+    return () => {
+      mobileTlRef.current?.kill();
+      mobileTlRef.current = null;
+    };
+  }, [sidebarOpen]);
 
   // Guard: verify token and ensure admin role, then load user
   useEffect(() => {
@@ -91,85 +162,91 @@ export default function DashboardLayout({
   return (
     <div>
       {/* Mobile sidebar overlay */}
-      {sidebarOpen && (
-        <div className="fixed inset-0 z-50 flex lg:hidden">
-          <div
-            className="fixed inset-0 bg-gray-900/80"
+      <div
+        ref={mobileContainerRef}
+        className="pointer-events-none fixed inset-0 z-50 flex lg:hidden"
+        aria-hidden={!sidebarOpen}
+      >
+        <div
+          ref={mobileBackdropRef}
+          className="absolute inset-0 bg-gray-900/80 opacity-0"
+          onClick={() => setSidebarOpen(false)}
+          aria-hidden="true"
+        />
+        <div
+          ref={mobileSidebarRef}
+          className="relative ml-0 flex w-full max-w-xs flex-1 transform-gpu flex-col bg-primary px-6 pb-4 opacity-0"
+        >
+          <button
+            type="button"
             onClick={() => setSidebarOpen(false)}
-            aria-hidden="true"
-          />
-          <div className="relative ml-0 flex w-full max-w-xs flex-1 bg-primary px-6 pb-4">
-            <button
-              type="button"
-              onClick={() => setSidebarOpen(false)}
-              className="absolute right-3 top-3 rounded p-2 text-white/90 hover:bg-white/10"
-              aria-label="Close sidebar"
-            >
-              <XMarkIcon aria-hidden className="size-6" />
-            </button>
-            <div className="mt-12 flex w-full flex-col gap-y-5 overflow-y-auto">
-              <div className="flex h-16 shrink-0 items-center">
-                <Link
-                  href="/dashboard"
-                  className="inline-flex items-center gap-2 text-white"
-                  onClick={() => setSidebarOpen(false)}
-                >
-                  <CubeTransparentIcon aria-hidden className="h-8 w-8 text-white" />
-                  <span className="text-lg font-semibold tracking-wide">Vectorize App</span>
-                </Link>
-              </div>
-              <nav className="flex flex-1 flex-col">
-                <ul role="list" className="flex flex-1 flex-col gap-y-7">
-                  <li>
-                    <ul role="list" className="-mx-2 space-y-1">
-                      {navigation.map((item) => (
-                        <li key={item.name}>
-                          <Link
-                            href={item.href}
-                            onClick={() => setSidebarOpen(false)}
-                            className={classNames(
-                              isActive(item.href)
-                                ? "bg-primary text-white"
-                                : "text-white hover:bg-white/10",
-                              "group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold",
-                            )}
-                          >
-                            <item.icon
-                              className={classNames(
-                                isActive(item.href) ? "text-white" : "text-white",
-                                "size-6 shrink-0",
-                              )}
-                              aria-hidden="true"
-                            />
-                            {item.name}
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </li>
-                  <li className="mt-auto">
-                    <Link
-                      href="/dashboard/settings"
-                      className={classNames(
-                        isActive("/dashboard/settings")
-                          ? "bg-primary text-white"
-                          : "text-white hover:bg-white/10",
-                        "group -mx-2 flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold",
-                      )}
-                    >
-                      <Cog6ToothIcon className={classNames(
-                        isActive("/dashboard/settings") ? "text-white" : "text-white",
-                        "size-6 shrink-0",
-                      )} aria-hidden="true" />
-                      Settings
-                    </Link>
-                  </li>
-                </ul>
-              </nav>
+            className="absolute right-3 top-3 rounded p-2 text-white/90 hover:bg-white/10"
+            aria-label="Close sidebar"
+          >
+            <XMarkIcon aria-hidden className="size-6" />
+          </button>
+          <div className="mt-12 flex w-full flex-col gap-y-5 overflow-y-auto">
+            <div className="flex h-16 shrink-0 items-center">
+              <Link
+                href="/dashboard"
+                className="mobile-nav-item inline-flex items-center gap-2 text-white"
+                onClick={() => setSidebarOpen(false)}
+              >
+                <CubeTransparentIcon aria-hidden className="h-8 w-8 text-white" />
+                <span className="text-lg font-semibold tracking-wide">Vectorize App</span>
+              </Link>
             </div>
+            <nav className="flex flex-1 flex-col">
+              <ul role="list" className="flex flex-1 flex-col gap-y-7">
+                <li>
+                  <ul role="list" className="-mx-2 space-y-1">
+                    {navigation.map((item) => (
+                      <li key={item.name}>
+                        <Link
+                          href={item.href}
+                          onClick={() => setSidebarOpen(false)}
+                          className={classNames(
+                            isActive(item.href)
+                              ? "bg-primary text-white"
+                              : "text-white hover:bg-white/10",
+                            "mobile-nav-item group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold",
+                          )}
+                        >
+                          <item.icon
+                            className={classNames(
+                              isActive(item.href) ? "text-white" : "text-white",
+                              "size-6 shrink-0",
+                            )}
+                            aria-hidden="true"
+                          />
+                          {item.name}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </li>
+                <li className="mt-auto">
+                  <Link
+                    href="/dashboard/settings"
+                    className={classNames(
+                      isActive("/dashboard/settings")
+                        ? "bg-primary text-white"
+                        : "text-white hover:bg-white/10",
+                      "mobile-nav-item group -mx-2 flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold",
+                    )}
+                  >
+                    <Cog6ToothIcon className={classNames(
+                      isActive("/dashboard/settings") ? "text-white" : "text-white",
+                      "size-6 shrink-0",
+                    )} aria-hidden="true" />
+                    Settings
+                  </Link>
+                </li>
+              </ul>
+            </nav>
           </div>
         </div>
-      )}
+      </div>
 
       {/* Static sidebar for desktop */}
       <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
