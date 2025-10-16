@@ -13,8 +13,8 @@ const PixelTransitionOverlay: React.FC<PixelTransitionOverlayProps> = ({
   active,
   onComplete,
   gridSize = 12,
-  color = "#06337b",
-  duration = 0.6,
+  color = "#ffffff",
+  duration = 0.8,
 }) => {
   const overlayRef = useRef<HTMLDivElement | null>(null);
   const squaresRef = useRef<HTMLDivElement[]>([]);
@@ -51,9 +51,9 @@ const PixelTransitionOverlay: React.FC<PixelTransitionOverlayProps> = ({
 
     tlRef.current?.kill();
 
-    gsap.set(overlay, { autoAlpha: 1, pointerEvents: "auto" });
+    gsap.set(overlay, { autoAlpha: 1, pointerEvents: "auto", backgroundColor: "transparent" });
     gsap.set(squares, {
-      scale: 0,
+      scale: 0.3,
       autoAlpha: 0,
       transformOrigin: "50% 50%",
     });
@@ -64,16 +64,36 @@ const PixelTransitionOverlay: React.FC<PixelTransitionOverlayProps> = ({
       },
     });
 
+    tl.to(
+      overlay,
+      {
+        backgroundColor: color,
+        duration: duration * 0.45,
+        ease: "power1.out",
+      },
+      0,
+    );
+
     tl.to(squares, {
-      scale: 1,
+      scale: 1.05,
       autoAlpha: 1,
       duration,
-      ease: "power2.out",
+      ease: "power3.out",
       stagger: {
-        each: duration / (squares.length * 1.5),
+        each: duration / (squares.length * 2.2),
         from: "random",
       },
     });
+
+    tl.to(
+      squares,
+      {
+        scale: 1,
+        duration: duration * 0.35,
+        ease: "power2.inOut",
+      },
+      "-=0.3",
+    );
 
     tlRef.current = tl;
 
