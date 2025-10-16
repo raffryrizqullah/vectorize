@@ -290,7 +290,7 @@ export default function HealthCheckPage() {
                 checked={deep}
                 onChange={(e) => setDeep(e.target.checked)}
               />
-              Deep mode
+              Deep
             </label>
             <label className="flex items-center gap-2 rounded-2xl border border-secondary/10 bg-secondary/5 px-3 py-2 text-sm text-secondary/70">
               <input
