@@ -7,6 +7,7 @@ import {
   getChatSessionMeta,
   getToken,
   listChatSessions,
+  meRequest,
   type ChatHistoryMessage,
   type ChatHistoryResult,
   type ChatSessionInfo,
@@ -18,6 +19,7 @@ import {
   DocumentMagnifyingGlassIcon,
   TrashIcon,
 } from "@heroicons/react/24/outline";
+import { isAdminRole, normalizeRoleValue } from "@/lib/roles";
 
 function formatDate(value?: string | null) {
   if (!value) return "-";
@@ -54,17 +56,23 @@ export default function ChatHistoryPage() {
   const [historyState, setHistoryState] = useState<HistoryState>({ loading: false, error: null, data: null });
   const [sessionMeta, setSessionMeta] = useState<ChatSessionInfo | null>(null);
   const [clearing, setClearing] = useState(false);
+  const [currentRole, setCurrentRole] = useState<string | null>(null);
+  const [roleLoaded, setRoleLoaded] = useState(false);
 
   const refreshSessions = useCallback(
     async (preserveSelected: string | null = selectedSessionId) => {
       setSessionsLoading(true);
-      setSessionsError(null);
       try {
         const token = getToken();
         if (!token) {
-          throw new Error("Admin token not found. Please log in again.");
+          throw new Error("Administrator or super administrator token not found. Please log in again.");
         }
-        const data = await listChatSessions(token, { limit: 200 });
+        const normalizedRole = currentRole ?? null;
+        if (normalizedRole && !isAdminRole(normalizedRole)) {
+          throw new Error("Only administrator or super administrator roles can access the session list.");
+        }
+        setSessionsError(null);
+        const data = await listChatSessions(token, { limit: 200, actorRole: normalizedRole });
         const sorted = [...data].sort((a, b) => (b.last_activity || "").localeCompare(a.last_activity || ""));
         if (preserveSelected && !sorted.some((item) => item.session_id === preserveSelected)) {
           sorted.unshift({ session_id: preserveSelected });
@@ -77,12 +85,42 @@ export default function ChatHistoryPage() {
         setSessionsLoading(false);
       }
     },
-    [selectedSessionId],
+    [currentRole, selectedSessionId],
   );
 
   useEffect(() => {
+    let cancelled = false;
+    const token = getToken();
+    if (!token) {
+      setCurrentRole(null);
+      setSessionsError("Administrator or super administrator token not found. Please log in again.");
+      setRoleLoaded(true);
+      return undefined;
+    }
+    meRequest(token)
+      .then((me) => {
+        if (cancelled) return;
+        const normalizedRole = normalizeRoleValue(me?.role ?? me?.user?.role);
+        setCurrentRole(normalizedRole);
+      })
+      .catch((err: any) => {
+        if (cancelled) return;
+        setCurrentRole(null);
+        setSessionsError(err?.message || "Failed to verify account role.");
+      })
+      .finally(() => {
+        if (cancelled) return;
+        setRoleLoaded(true);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!roleLoaded) return;
     refreshSessions();
-  }, [refreshSessions]);
+  }, [roleLoaded, refreshSessions]);
 
   const loadSessionDetails = useCallback(async (sessionId: string) => {
     setHistoryState({ loading: true, error: null, data: null });

@@ -14,6 +14,7 @@ import {
   getToken,
   listDocuments,
   listChatSessions,
+  meRequest,
   type DocumentsListResponse,
   type DocumentSummary,
   type ChatSessionInfo,
@@ -28,6 +29,7 @@ import {
   secondaryButtonClass,
   alertStyles,
 } from "@/styles/design";
+import { isAdminRole, normalizeRoleValue } from "@/lib/roles";
 
 type IconRenderer = ComponentType<{ className?: string }>;
 
@@ -218,9 +220,14 @@ export default function DashboardPage() {
       if (!token) {
         throw new Error("Missing authentication token. Please log in again.");
       }
+      const me = await meRequest(token);
+      const normalizedRole = normalizeRoleValue(me?.role ?? me?.user?.role);
+      if (normalizedRole && !isAdminRole(normalizedRole)) {
+        throw new Error("Only administrator or super administrator roles can access the dashboard.");
+      }
       const [documents, sessionList, healthSummary] = await Promise.all([
         listDocuments(token, { limit: 1000 }),
-        listChatSessions(token, { limit: 1000 }),
+        listChatSessions(token, { limit: 1000, actorRole: normalizedRole }),
         getHealthSummary(true),
       ]);
       setDocData(documents);

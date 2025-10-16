@@ -7,7 +7,7 @@ import {
   clearToken,
   handleUnauthorized,
 } from "./auth-storage";
-import { normalizeRoleValue, UserRole } from "./roles";
+import { isAdminRole, normalizeRoleValue, UserRole } from "./roles";
 
 export { TOKEN_STORAGE_KEY, getToken, setToken, clearToken };
 
@@ -344,12 +344,17 @@ function normalizeHistoryEntry(entry: any, index: number): ChatHistoryMessage | 
   return message;
 }
 
-export async function listChatSessions(token?: string | null, opts?: { limit?: number }): Promise<ChatSessionInfo[]> {
+export async function listChatSessions(
+  token?: string | null,
+  opts?: { limit?: number; actorRole?: string | null },
+): Promise<ChatSessionInfo[]> {
   const query = opts?.limit ? `?limit=${encodeURIComponent(String(opts.limit))}` : "";
-  const endpoints = [
-    `${API_BASE_URL}/api/v1/sessions${query}`,
-    `${API_BASE_URL}/api/v1/history`,
-  ];
+  const normalizedRole = opts?.actorRole ? normalizeRoleValue(opts.actorRole) : null;
+  const endpoints: string[] = [];
+  if (!normalizedRole || isAdminRole(normalizedRole)) {
+    endpoints.push(`${API_BASE_URL}/api/v1/sessions${query}`);
+  }
+  endpoints.push(`${API_BASE_URL}/api/v1/history`);
 
   const collectFromData = (data: any) => {
     const collected: ChatSessionInfo[] = [];
