@@ -1,28 +1,13 @@
 "use client";
 
-import { useMemo, useRef } from "react";
+import { useRef } from "react";
 import Link from "next/link";
 import { CubeTransparentIcon } from "@heroicons/react/24/outline";
 import Silk from "@/components/Silk";
 import VariableProximity from "@/components/VariableProximity";
-import LogoLoop, { type LogoItem } from "@/components/LogoLoop";
-import SplitText from "@/components/SplitText";
 
 export default function Home() {
   const heroRef = useRef<HTMLDivElement | null>(null);
-  const logos = useMemo<LogoItem[]>(
-    () => [
-      { src: "/next.svg", alt: "Next.js" },
-      { src: "/vercel.svg", alt: "Vercel" },
-      { src: "/globe.svg", alt: "Global Reach" },
-      { node: <span className="font-semibold">Pinecone</span> },
-      { node: <span className="font-semibold">FastAPI</span> },
-      { src: "/window.svg", alt: "Dashboard" },
-      { node: <span className="font-semibold">Redis</span> },
-      { node: <span className="font-semibold">OpenAI</span> },
-    ],
-    [],
-  );
 
   return (
     <div className="bg-background text-white">
@@ -55,16 +40,9 @@ export default function Home() {
               toFontVariationSettings="'opsz' 120, 'wght' 920, 'slnt' -10, 'wdth' 112"
             />
           </h1>
-          <SplitText
-            text={"Connect, refine, and evolve the way your team learns and makes decisions \u2014 seamlessly and intelligently."}
-            tag="p"
-            splitType="words, chars"
-            delay={45}
-            duration={0.5}
-            className="mt-6 text-lg font-medium text-white/85 sm:text-xl/8 leading-relaxed max-w-3xl mx-auto"
-            textAlign="center"
-            rootMargin="-120px"
-          />
+          <p className="mt-6 max-w-3xl text-lg font-medium text-white/85 sm:text-xl/8 leading-relaxed">
+            Connect, refine, and evolve the way your team learns and makes decisions — seamlessly and intelligently.
+          </p>
           <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
             <Link
               href="/login"
@@ -72,18 +50,6 @@ export default function Home() {
             >
               Get started
             </Link>
-          </div>
-          <div className="mt-14 w-full max-w-4xl">
-            <LogoLoop
-              logos={logos}
-              speed={80}
-              gap={48}
-              logoHeight={32}
-              fadeOut
-              scaleOnHover
-              ariaLabel="Technologies powering Vectorize"
-              className="mx-auto max-w-full"
-            />
           </div>
         </div>
       </div>
